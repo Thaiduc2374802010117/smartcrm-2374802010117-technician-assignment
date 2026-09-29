@@ -2,7 +2,7 @@
 ## Phân công kỹ thuật viên và lịch hẹn giao – nhận máy bảo hành
 
 Sinh viên: Nguyễn Thái Đức – MSSV 2374802010117 – Track SE
-Tài liệu bổ sung kỹ thuật cho [SRS](srs.md). Mọi endpoint truy vết về User Story ở mục 3.2 và bảng truy vết mục 6 của SRS.
+Tài liệu bổ sung kỹ thuật cho [SRS](srs.md). Mọi endpoint truy vết về User Story và bảng truy vết mục 6 của SRS (phiên bản 1.1).
 
 ---
 
@@ -17,11 +17,10 @@ Tài liệu bổ sung kỹ thuật cho [SRS](srs.md). Mọi endpoint truy vết 
 | E5 | POST | `/api/tickets/{ticket_id}/appointments` | Tạo lịch hẹn giao / trả máy, chặn trùng lịch | US5 | FR5 | Quản lý |
 | E6 | PUT | `/api/tickets/{ticket_id}/assignment` | Đổi kỹ thuật viên kèm lý do | US4 | FR4 | Quản lý |
 | E7 | GET | `/api/me/tickets` | Danh sách phiếu đang mở của kỹ thuật viên đang dùng | US6 | FR6 | Kỹ thuật viên |
-| E8 | PATCH | `/api/tickets/{ticket_id}/status` | Chuyển trạng thái xử lý phiếu | US8 | FR7 | Kỹ thuật viên |
-| E9 | GET | `/api/workload` | Bảng khối lượng công việc của trung tâm | US7 | FR8 | Quản lý |
+| E8 | GET | `/api/workload` | Bảng khối lượng công việc của trung tâm | US7 | FR7 | Quản lý |
 
 Các endpoint `GET /` và `GET /db-check` là smoke test hạ tầng của Buổi 2, không phục vụ User Story nên **không thuộc hợp đồng này**.
-US9 (COULD) không có endpoint ở phiên bản này.
+Việc kỹ thuật viên cập nhật tiến độ sửa chữa là W4 trong SRS nên không có endpoint.
 
 ---
 
@@ -144,6 +143,7 @@ Quy tắc (QT-08): `is_active = true`, cùng `center_id` với phiếu, `profici
     "log_id": 5501,
     "from_status": "MOI",
     "to_status": "DA_PHAN_CONG",
+    "to_technician_id": 12,
     "changed_at": "2026-10-09T10:05:00+07:00",
     "changed_by": 3
   }
@@ -236,10 +236,9 @@ Lịch hẹn tự gắn với kỹ thuật viên **đang giữ phiếu** (QT-L4-
 
 | Endpoint | Request | Response thành công | Response lỗi chính |
 |---|---|---|---|
-| **E6** PUT `/api/tickets/{id}/assignment` | `{ "technician_id": 7, "reason": "KTV B nghỉ phép đột xuất" }` | 200 – phiếu với `technician_id` mới, `assignment_log` (cũ, mới, lý do); lịch hẹn chưa diễn ra bị hủy (QT-L4-05) | 400 thiếu lý do · 409 phiếu không đang mở hoặc chọn trùng KTV hiện tại · 422 KTV mới không thỏa QT-08 |
-| **E7** GET `/api/me/tickets` | Query `page`, `size` | 200 – danh sách phiếu đang mở của KTV, sắp theo `due_date`, có `is_due_soon`, `is_overdue`, `customer_phone` dạng che | 401 thiếu người dùng · 403 không phải KTV |
-| **E8** PATCH `/api/tickets/{id}/status` | `{ "to_status": "DANG_XU_LY", "note": "Bắt đầu kiểm tra màn hình" }` | 200 – trạng thái mới và dòng `status_log` | 403 phiếu không phải của KTV này · 422 `INVALID_TRANSITION` (ví dụ `DANG_XU_LY → MOI`) |
-| **E9** GET `/api/workload` | Không | 200 – `[{ technician_id, full_name, open_ticket_count, due_soon_count, overdue_count }]` | 403 không phải Quản lý |
+| **E6** PUT `/api/tickets/{id}/assignment` | `{ "technician_id": 7, "reason": "KTV B nghỉ phép đột xuất" }` | 200 – phiếu với `technician_id` mới, dòng `status_log` có `from_technician_id`, `to_technician_id`, `note` = lý do; lịch hẹn chưa diễn ra bị hủy (QT-L4-05) | 400 thiếu lý do · 409 phiếu không đang mở hoặc chọn trùng KTV hiện tại · 422 KTV mới không thỏa QT-08 |
+| **E7** GET `/api/me/tickets` | Query `page`, `size` | 200 – danh sách phiếu đang mở của KTV, sắp theo `due_date`, có `is_due_soon`, `is_overdue` | 401 thiếu người dùng · 403 không phải KTV |
+| **E8** GET `/api/workload` | Không | 200 – `[{ technician_id, full_name, open_ticket_count, due_soon_count, overdue_count }]` | 403 không phải Quản lý |
 
 ---
 
@@ -273,12 +272,6 @@ Lịch hẹn tự gắn với kỹ thuật viên **đang giữ phiếu** (QT-L4-
 | `reason` | Có | Chuỗi 10–255 ký tự (QT-07) | Lý do đổi phải có từ 10 đến 255 ký tự |
 | — trạng thái phiếu | — | `DA_PHAN_CONG`, `DANG_XU_LY` hoặc `CHO_LINH_KIEN` | Chỉ đổi kỹ thuật viên khi phiếu đang mở |
 
-### E8 – PATCH status
-
-| Trường | Bắt buộc | Kiểu / ràng buộc | Thông báo lỗi |
-|---|---|---|---|
-| `to_status` | Có | Chuyển hợp lệ theo QT-06: `DA_PHAN_CONG→DANG_XU_LY`, `DANG_XU_LY→CHO_LINH_KIEN`, `DANG_XU_LY→HOAN_TAT`, `CHO_LINH_KIEN→HOAN_TAT` | Không được chuyển từ {hiện tại} sang {mới} |
-| `note` | Bắt buộc khi `to_status = CHO_LINH_KIEN` | Chuỗi, tối đa 255 ký tự | Cần ghi rõ linh kiện đang chờ |
 
 ### E1 – Query
 
@@ -293,13 +286,12 @@ Lịch hẹn tự gắn với kỹ thuật viên **đang giữ phiếu** (QT-L4-
 
 ## 6. Xác thực và phân quyền
 
-Phiên bản BT1–BT2 **giả lập** người dùng (W7 trong SRS): mỗi request gửi header `X-Employee-Id` với mã nhân viên có trong bảng `employee`. Hệ thống tra vai trò và trung tâm từ mã này; không tin vai trò do client gửi lên.
+Phiên bản BT1–BT2 **giả lập** người dùng (W8 trong SRS): mỗi request gửi header `X-Employee-Id` với mã nhân viên có trong bảng `employee`. Hệ thống tra vai trò và trung tâm từ mã này; không tin vai trò do client gửi lên.
 
 | Endpoint | Quản lý trung tâm | Kỹ thuật viên |
 |---|---|---|
-| E1, E2, E3, E4, E5, E6, E9 | ✅ trong trung tâm mình | ❌ 403 |
+| E1, E2, E3, E4, E5, E6, E8 | ✅ trong trung tâm mình | ❌ 403 |
 | E7 | ❌ 403 | ✅ phiếu của chính mình |
-| E8 | ❌ 403 | ✅ phiếu của chính mình |
 
 Thiếu header hoặc mã không tồn tại → **401**. Đúng vai trò nhưng khác trung tâm → **403** (QT-14).
 
@@ -309,6 +301,6 @@ Thiếu header hoặc mã không tồn tại → **401**. Đúng vai trò nhưng
 
 - [x] Mỗi endpoint nối được về ít nhất một User Story (bảng mục 1).
 - [x] Mỗi endpoint MUST có ≥ 1 response thành công và ≥ 2 response lỗi.
-- [x] Mọi trường request body có cột tương ứng trong mô hình dữ liệu dự kiến (`ticket`, `technician`, `technician_skill`, `appointment`, `ticket_status_log`, `ticket_assignment_log`) – đối chiếu lại khi vẽ ERD ở buổi 5.
+- [x] Mọi trường request body có cột tương ứng trong mô hình dữ liệu dự kiến trong ERD (`ticket`, `technician`, `technician_skill`, `issue_category`, `appointment`, `ticket_status_log`) – đã đối chiếu với `schema.sql`.
 - [x] Không có endpoint thừa.
-- [x] QT-06, QT-07, QT-08, QT-14, QT-15 và QT-L4-01…05 xuất hiện trong bảng validation hoặc mã lỗi.
+- [x] QT-06, QT-07, QT-08, QT-14 và QT-L4-01…05 xuất hiện trong bảng validation hoặc mã lỗi.

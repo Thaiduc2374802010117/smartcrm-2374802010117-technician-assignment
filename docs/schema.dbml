@@ -1,0 +1,90 @@
+// dbdiagram.io – Luồng L4 · Nguyễn Thái Đức – 2374802010117
+// Dán nội dung này vào https://dbdiagram.io để xem và chỉnh ERD
+
+Table service_center [note: 'Phụ trợ tối thiểu'] {
+  center_id int [pk, increment]
+  center_name varchar(120) [not null]
+  city varchar(60)
+}
+
+Table employee [note: 'Phụ trợ tối thiểu'] {
+  employee_id bigint [pk, increment]
+  full_name varchar(120) [not null]
+  role varchar(20) [not null, note: 'QUAN_LY | KY_THUAT_VIEN']
+  center_id int [not null, ref: > service_center.center_id]
+  is_active boolean [not null, default: true]
+}
+
+Table issue_category {
+  category_id int [pk, increment]
+  category_name varchar(60) [not null, unique]
+  default_priority varchar(10) [not null]
+  is_active boolean [not null, default: true]
+}
+
+Table technician {
+  technician_id bigint [pk, increment]
+  employee_id bigint [not null, unique, ref: - employee.employee_id]
+  center_id int [not null, ref: > service_center.center_id]
+  level varchar(10) [not null, note: 'SO_CAP | TRUNG_CAP | CAO_CAP']
+  is_active boolean [not null, default: true]
+}
+
+Table technician_skill {
+  technician_id bigint [not null, ref: > technician.technician_id]
+  category_id int [not null, ref: > issue_category.category_id]
+  proficiency smallint [not null, note: '1–5']
+  indexes {
+    (technician_id, category_id) [pk]
+    (category_id, proficiency)
+  }
+}
+
+Table ticket {
+  ticket_id bigint [pk, increment]
+  ticket_code varchar(20) [not null, unique]
+  center_id int [not null, ref: > service_center.center_id]
+  category_id int [ref: > issue_category.category_id]
+  issue_desc text [not null]
+  priority varchar(10) [not null]
+  status varchar(20) [not null]
+  technician_id bigint [ref: > technician.technician_id]
+  received_at timestamptz [not null]
+  due_date timestamptz [not null, note: 'QT-04, sinh ở L2']
+  is_deleted boolean [not null, default: false]
+  indexes {
+    (center_id, status, due_date)
+    (technician_id, status)
+  }
+}
+
+Table appointment {
+  appointment_id bigint [pk, increment]
+  ticket_id bigint [not null, ref: > ticket.ticket_id]
+  technician_id bigint [not null, ref: > technician.technician_id]
+  appointment_type varchar(10) [not null, note: 'GIAO_MAY | TRA_MAY']
+  start_at timestamptz [not null]
+  end_at timestamptz [not null]
+  status varchar(12) [not null, default: 'DA_HEN']
+  note varchar(255)
+  created_by bigint [not null, ref: > employee.employee_id]
+  created_at timestamptz [not null, default: `now()`]
+  indexes {
+    (technician_id, start_at)
+  }
+}
+
+Table ticket_status_log {
+  log_id bigint [pk, increment]
+  ticket_id bigint [not null, ref: > ticket.ticket_id]
+  from_status varchar(20)
+  to_status varchar(20) [not null]
+  from_technician_id bigint [ref: > technician.technician_id]
+  to_technician_id bigint [ref: > technician.technician_id]
+  changed_at timestamptz [not null, default: `now()`]
+  changed_by bigint [not null, ref: > employee.employee_id]
+  note varchar(255)
+  indexes {
+    (ticket_id, changed_at)
+  }
+}

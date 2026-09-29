@@ -17,7 +17,7 @@ Tài liệu làm việc cho Buổi 3 – 4: áp bộ mười câu hỏi khai th�
 
 | # | Câu hỏi | Trả lời từ case study | Yêu cầu rút ra |
 |---|---|---|---|
-| 1 | Công việc này hiện đang làm thế nào? Ai làm? Mất bao lâu? | Quản lý lấy xấp phiếu cuối buổi sáng, phân công theo trí nhớ (6.1 bước 7). Cuối tháng đếm tay phiếu quá hạn gần một ngày (chị Trâm). | FR1, FR3, FR8 |
+| 1 | Công việc này hiện đang làm thế nào? Ai làm? Mất bao lâu? | Quản lý lấy xấp phiếu cuối buổi sáng, phân công theo trí nhớ (6.1 bước 7). Cuối tháng đếm tay phiếu quá hạn gần một ngày (chị Trâm). | FR1, FR3, FR7 |
 | 2 | Điều gì khiến việc này chậm hoặc sai nhất? | Không nhớ ai đang giữ bao nhiêu phiếu; giao sai chuyên môn phải chuyển qua lại (chị Trâm). | FR2 (gợi ý theo tay nghề và khối lượng) |
 | 3 | Nếu hệ thống chỉ làm đúng MỘT việc, đó là gì? | "Một màn hình thấy được hôm nay có bao nhiêu phiếu, bao nhiêu sắp quá hạn, ai đang làm gì" (chị Trâm). | US1, US7; phân công là MUST |
 | 4 | Ai dùng chức năng này? Mỗi vai trò thấy gì, không được thấy gì? | Quản lý trung tâm phân công; KTV xử lý. QT-14: chỉ thấy trung tâm mình; QT-15: KTV thấy SĐT dạng che. | Mục 2 SRS, NFR4 |
@@ -39,35 +39,33 @@ Tài liệu làm việc cho Buổi 3 – 4: áp bộ mười câu hỏi khai th�
 | N5 | Đặt lịch hẹn trùng giờ KTV | Từ chối, gợi ý khung giờ trống gần nhất | UC5 – 5a |
 | N6 | Đặt lịch hẹn cho phiếu chưa phân công | Từ chối, dẫn tới chức năng phân công | UC5 – 1a |
 | N7 | Đổi KTV khi phiếu đã có lịch hẹn | Hủy lịch hẹn chưa diễn ra, yêu cầu đặt lại | QT-L4-05 |
-| N8 | Phiếu nằm Chờ linh kiện quá lâu (6.1 bước 9: có phiếu 3 tuần) | Cảnh báo sau 3 ngày | US9 (COULD) |
-| N9 | KTV cố chuyển trạng thái ngược | Từ chối theo QT-06 | FR7, E8 |
+| N8 | Phiếu nằm Chờ linh kiện quá lâu (6.1 bước 9: có phiếu 3 tuần) | Hiển thị trong bảng khối lượng công việc (phiếu quá hạn); cảnh báo tự động để hướng mở rộng | US7 |
+| N9 | Phân công lại phiếu đã có KTV bằng chức năng phân công | Từ chối, yêu cầu dùng chức năng đổi KTV (QT-L4-01) | FR3, E3 |
 
 ## 4. "Hỏi vì sao hai lần" – từ giải pháp về yêu cầu thật
 
 | Phát biểu gốc | Vì sao? (lần 1 → lý do) | Vì sao? (lần 2 → yêu cầu thật) |
 |---|---|---|
-| Chị Trâm: "Em cần một màn hình thấy ai đang làm gì" | Để biết ai rảnh mà giao việc | Hệ thống phải tính được **số phiếu đang mở của từng KTV** và dùng nó khi gợi ý (FR2, FR8) |
+| Chị Trâm: "Em cần một màn hình thấy ai đang làm gì" | Để biết ai rảnh mà giao việc | Hệ thống phải tính được **số phiếu đang mở của từng KTV** và dùng nó khi gợi ý (FR2, FR7) |
 | Anh Dũng: "Em không biết cái nào gấp, thường làm cái dễ trước" | Vì xấp phiếu giấy không có thứ tự | Danh sách phiếu của KTV phải **sắp theo hạn cam kết** và **đánh dấu phiếu sắp quá hạn** (FR6) |
 | Chị Trâm: "Giao sai người thì mất thời gian chuyển qua lại" | Vì mỗi KTV giỏi một nhóm sự cố khác nhau | Chỉ gợi ý KTV có **tay nghề ≥ 3 ở đúng nhóm sự cố** (QT-08, FR2); đổi người phải **có lý do** để truy được (FR4) |
 
-## 5. Tự kiểm INVEST cho 9 User Story
+## 5. Tự kiểm INVEST cho 7 User Story
 
 | Story | I | N | V | E | S | T | Ghi chú |
 |---|---|---|---|---|---|---|---|
 | US1 Xem phiếu chờ phân công | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | Chỉ đọc dữ liệu có sẵn |
-| US2 Gợi ý KTV | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | Làm độc lập được: chỉ cần phiếu + dữ liệu tay nghề |
-| US3 Phân công | ✅* | ✅ | ✅ | ✅ | ✅ | ✅ | *Dùng kết quả US2 để kiểm tra điều kiện nhưng hiện thực và kiểm thử riêng được |
+| US2 Gợi ý KTV | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | Chỉ cần phiếu + dữ liệu tay nghề |
+| US3 Phân công | ✅* | ✅ | ✅ | ✅ | ✅ | ✅ | *Dùng điều kiện của US2 nhưng hiện thực và kiểm thử riêng được |
 | US4 Đổi KTV | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | |
-| US5 Đặt lịch hẹn | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | Kiểm thử được bằng dữ liệu phiếu đã phân công sẵn |
+| US5 Đặt lịch hẹn | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | Kiểm thử bằng phiếu đã phân công sẵn |
 | US6 Danh sách của KTV | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | |
 | US7 Khối lượng công việc | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | |
-| US8 Cập nhật trạng thái | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | |
-| US9 Cảnh báo chờ linh kiện | ✅ | ✅ | ✅ | ⚠️ | ✅ | ✅ | Khó ước lượng vì cần tác vụ định kỳ → để COULD |
 
 **Đã sửa so với bản nháp Buổi 2:**
 - Bản nháp "hệ thống **gợi ý 3 kỹ thuật viên** (cùng trung tâm, tay nghề ≥ 3, ít việc nhất)" chứa chi tiết hiện thực → đưa chi tiết sang FR2 và tiêu chí chấp nhận, story chỉ giữ mục tiêu (tiêu chí **N**).
 - Bản nháp "đổi kỹ thuật viên kèm lý do **bắt buộc**" và "ghi lịch sử trạng thái" → giữ ở FR, không nhồi vào story.
-- Tách "phiếu sắp quá hạn" và "phiếu chờ linh kiện quá lâu" thành hai story khác nhau (US6, US9) để chấp nhận hoặc từ chối riêng.
+- Theo đề BT1 (5–7 story): bỏ story "KTV cập nhật trạng thái" (thành W4) và "cảnh báo phiếu chờ linh kiện" khỏi phạm vi; giữ đúng 7 story như phiếu phạm vi.
 
 ## 6. Tự kiểm bốn lỗi khi phát biểu yêu cầu
 

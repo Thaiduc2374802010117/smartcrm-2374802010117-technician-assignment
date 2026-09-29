@@ -1,0 +1,49 @@
+@startuml
+' Use Case Diagram - Luong L4: Phan cong ky thuat vien va lich hen
+skinparam defaultFontName "DejaVu Sans"
+skinparam defaultFontSize 13
+left to right direction
+skinparam packageStyle rectangle
+skinparam usecase {
+  BackgroundColor #EAF2FB
+  BorderColor #2F5597
+}
+
+actor "Quản lý trung tâm" as QLTT
+actor "Kỹ thuật viên" as KTV
+actor "Hệ thống nhắc hạn\n(Thời gian)" as HTNH
+
+rectangle "Hệ thống: Phân công kỹ thuật viên và lịch hẹn (luồng L4)" {
+  usecase "UC1: Xem danh sách phiếu\nchờ phân công" as UC1
+  usecase "UC2: Xem gợi ý\nkỹ thuật viên phù hợp" as UC2
+  usecase "UC3: Phân công kỹ thuật viên\ncho phiếu" as UC3
+  usecase "UC4: Đổi kỹ thuật viên\nkèm lý do" as UC4
+  usecase "UC5: Đặt lịch hẹn\ngiao – nhận máy" as UC5
+  usecase "UC6: Xem danh sách phiếu\nđược giao cho tôi" as UC6
+  usecase "UC7: Cập nhật trạng thái\nxử lý phiếu" as UC7
+  usecase "UC8: Xem bảng khối lượng\ncông việc" as UC8
+  usecase "UC9: Cảnh báo phiếu\nsắp quá hạn" as UC9
+
+  UC3 .> UC2 : <<include>>
+  UC4 .> UC2 : <<include>>
+}
+
+QLTT -- UC1
+QLTT -- UC3
+QLTT -- UC4
+QLTT -- UC5
+QLTT -- UC8
+UC6 -- KTV
+UC7 -- KTV
+UC9 -- HTNH
+
+legend right
+  **Chú thích**
+  Hình người: actor (vai trò dùng hệ thống)
+  Hình elip: use case (ĐỘNG TỪ + ĐỐI TƯỢNG)
+  Khung chữ nhật: ranh giới hệ thống L4
+  <<include>>: UC3, UC4 LUÔN gọi UC2
+  (phân công chỉ chọn trong danh sách gợi ý – QT-08)
+  UC9: mức COULD, chưa hiện thực ở phiên bản này
+endlegend
+@enduml

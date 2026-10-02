@@ -2,7 +2,7 @@
 ## Phân công kỹ thuật viên và lịch hẹn giao – nhận máy bảo hành
 
 Sinh viên: Nguyễn Thái Đức – MSSV 2374802010117 – Track SE
-Tài liệu bổ sung kỹ thuật cho [SRS](srs.md). Mọi endpoint truy vết về User Story và bảng truy vết mục 6 của SRS (phiên bản 1.1).
+Tài liệu bổ sung kỹ thuật cho [SRS](srs.md). Mọi endpoint truy vết về User Story và bảng truy vết mục 6 của SRS (phiên bản 1.2).
 
 ---
 
@@ -18,6 +18,7 @@ Tài liệu bổ sung kỹ thuật cho [SRS](srs.md). Mọi endpoint truy vết 
 | E6 | PUT | `/api/tickets/{ticket_id}/assignment` | Đổi kỹ thuật viên kèm lý do | US4 | FR4 | Quản lý |
 | E7 | GET | `/api/me/tickets` | Danh sách phiếu đang mở của kỹ thuật viên đang dùng | US6 | FR6 | Kỹ thuật viên |
 | E8 | GET | `/api/workload` | Bảng khối lượng công việc của trung tâm | US7 | FR7 | Quản lý |
+| E9 | GET | `/api/tickets/{ticket_id}/history` | Lịch sử phiếu: chuyển trạng thái, đổi kỹ thuật viên | US8 | FR8 | Quản lý |
 
 Các endpoint `GET /` và `GET /db-check` là smoke test hạ tầng của Buổi 2, không phục vụ User Story nên **không thuộc hợp đồng này**.
 Việc kỹ thuật viên cập nhật tiến độ sửa chữa là W4 trong SRS nên không có endpoint.
@@ -33,6 +34,7 @@ Việc kỹ thuật viên cập nhật tiến độ sửa chữa là W4 trong SR
   - Trạng thái phiếu: `MOI`, `DA_PHAN_CONG`, `DANG_XU_LY`, `CHO_LINH_KIEN`, `HOAN_TAT`, `DA_DONG`, `DA_HUY`
   - Mức ưu tiên: `CAO`, `TRUNG_BINH`, `THAP`
   - Loại lịch hẹn: `GIAO_MAY`, `TRA_MAY` · Trạng thái lịch hẹn: `DA_HEN`, `DA_HUY`, `HOAN_THANH`
+- **Dữ liệu mẫu trong JSON** lấy theo case study: trung tâm bảo hành Quận Tân Bình (quản lý: chị Trâm, Mục 4), mã phiếu dạng `BH000123/2026` (Mục 8), nhóm sự cố và mức ưu tiên theo Bảng 3.1, hạn cam kết tính theo QT-04 (CAO = 24 giờ).
 - **Phân trang:** `page` (bắt đầu từ 1), `size` (mặc định 20, tối đa 100). Response danh sách kèm `page`, `size`, `total`.
 - **Cấu trúc lỗi thống nhất:**
   ```json
@@ -72,6 +74,7 @@ Trung tâm **lấy theo người dùng**, không nhận từ query, để bảo 
 **Response 200 OK**
 ```json
 {
+  "center_id": 4, "center_name": "Trung tâm bảo hành Quận Tân Bình",
   "page": 1, "size": 20, "total": 2,
   "items": [
     {
@@ -232,13 +235,14 @@ Lịch hẹn tự gắn với kỹ thuật viên **đang giữ phiếu** (QT-L4-
 
 ---
 
-## 4. Endpoint mức SHOULD (tóm tắt)
+## 4. Endpoint mức SHOULD và COULD (tóm tắt)
 
 | Endpoint | Request | Response thành công | Response lỗi chính |
 |---|---|---|---|
 | **E6** PUT `/api/tickets/{id}/assignment` | `{ "technician_id": 7, "reason": "KTV B nghỉ phép đột xuất" }` | 200 – phiếu với `technician_id` mới, dòng `status_log` có `from_technician_id`, `to_technician_id`, `note` = lý do; lịch hẹn chưa diễn ra bị hủy (QT-L4-05) | 400 thiếu lý do · 409 phiếu không đang mở hoặc chọn trùng KTV hiện tại · 422 KTV mới không thỏa QT-08 |
 | **E7** GET `/api/me/tickets` | Query `page`, `size` | 200 – danh sách phiếu đang mở của KTV, sắp theo `due_date`, có `is_due_soon`, `is_overdue` | 401 thiếu người dùng · 403 không phải KTV |
-| **E8** GET `/api/workload` | Không | 200 – `[{ technician_id, full_name, open_ticket_count, due_soon_count, overdue_count }]` | 403 không phải Quản lý |
+| **E9** GET `/api/tickets/{id}/history` | Không | 200 – `[{ log_id, from_status, to_status, from_technician_id, to_technician_id, note, changed_at, changed_by }]` sắp theo `changed_at` tăng dần | 403 phiếu thuộc trung tâm khác · 404 phiếu không tồn tại |
+| **E8** GET `/api/workload` | Không | 200 – `[{ technician_id, full_name, open_ticket_count, due_soon_count, overdue_count }]` | 401 thiếu người dùng · 403 không phải Quản lý |
 
 ---
 
@@ -286,11 +290,11 @@ Lịch hẹn tự gắn với kỹ thuật viên **đang giữ phiếu** (QT-L4-
 
 ## 6. Xác thực và phân quyền
 
-Phiên bản BT1–BT2 **giả lập** người dùng (W8 trong SRS): mỗi request gửi header `X-Employee-Id` với mã nhân viên có trong bảng `employee`. Hệ thống tra vai trò và trung tâm từ mã này; không tin vai trò do client gửi lên.
+Phiên bản hiện tại **giả lập** người dùng (W8 trong SRS): mỗi request gửi header `X-Employee-Id` với mã nhân viên có trong bảng `employee`. Hệ thống tra vai trò và trung tâm từ mã này; không tin vai trò do client gửi lên.
 
 | Endpoint | Quản lý trung tâm | Kỹ thuật viên |
 |---|---|---|
-| E1, E2, E3, E4, E5, E6, E8 | ✅ trong trung tâm mình | ❌ 403 |
+| E1, E2, E3, E4, E5, E6, E8, E9 | ✅ trong trung tâm mình | ❌ 403 |
 | E7 | ❌ 403 | ✅ phiếu của chính mình |
 
 Thiếu header hoặc mã không tồn tại → **401**. Đúng vai trò nhưng khác trung tâm → **403** (QT-14).

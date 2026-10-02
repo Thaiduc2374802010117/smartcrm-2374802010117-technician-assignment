@@ -1,6 +1,6 @@
 # Bản SRS rút gọn – Luồng L4: Phân công kỹ thuật viên và lịch hẹn
 
-Nguyễn Thái Đức – MSSV 2374802010117 – Track SE · Phiên bản 1.1 · Rút gọn theo tinh thần ISO/IEC/IEEE 29148 (không tuân thủ đầy đủ)
+Nguyễn Thái Đức – MSSV 2374802010117 – Track SE · Phiên bản 1.2 · Rút gọn theo tinh thần ISO/IEC/IEEE 29148 (không tuân thủ đầy đủ)
 
 ## 1. Giới thiệu và phạm vi
 
@@ -37,7 +37,7 @@ W8 đăng nhập và phân quyền đầy đủ (giả lập người dùng bằ
 
 | Actor | Được làm | KHÔNG được làm |
 |---|---|---|
-| **Quản lý trung tâm** | Xem phiếu chờ phân công; xem gợi ý; phân công và đổi kỹ thuật viên; đặt lịch hẹn; xem khối lượng công việc – chỉ trong trung tâm mình | Xem hoặc phân công phiếu của trung tâm khác (QT-14); xóa phiếu, xóa lịch hẹn (QT-13) |
+| **Quản lý trung tâm** | Xem phiếu chờ phân công; xem gợi ý; phân công và đổi kỹ thuật viên; đặt lịch hẹn; xem khối lượng công việc; xem lịch sử phiếu – chỉ trong trung tâm mình | Xem hoặc phân công phiếu của trung tâm khác (QT-14); xóa phiếu, xóa lịch hẹn (QT-13) |
 | **Kỹ thuật viên** | Xem danh sách phiếu đang mở được giao cho chính mình | Tự nhận phiếu; chuyển phiếu cho người khác; xem phiếu của người khác |
 
 Khách hàng là người hưởng lợi, không thao tác trực tiếp: quản lý đặt lịch hẹn thay khách.
@@ -53,6 +53,7 @@ Khách hàng là người hưởng lợi, không thao tác trực tiếp: quản
 | **FR5** | Hệ thống cho phép tạo lịch hẹn GIAO_MAY hoặc TRA_MAY cho phiếu đã có kỹ thuật viên và từ chối lịch hẹn giao nhau với lịch hẹn DA_HEN khác của cùng kỹ thuật viên. |
 | **FR6** | Hệ thống hiển thị cho kỹ thuật viên các phiếu đang mở được giao cho họ, sắp theo hạn cam kết, đánh dấu phiếu sắp quá hạn và quá hạn. |
 | **FR7** | Hệ thống hiển thị bảng khối lượng công việc của trung tâm: mỗi kỹ thuật viên có số phiếu đang mở, số phiếu sắp quá hạn, số phiếu quá hạn tại thời điểm xem. |
+| **FR8** | Hệ thống hiển thị lịch sử của một phiếu theo thời gian: mỗi dòng gồm trạng thái trước/sau, kỹ thuật viên trước/sau, lý do, thời điểm và người thực hiện. |
 
 | Mã | User Story | MoSCoW |
 |---|---|---|
@@ -60,15 +61,18 @@ Khách hàng là người hưởng lợi, không thao tác trực tiếp: quản
 | **US2** | Là **quản lý trung tâm**, tôi muốn xem gợi ý kỹ thuật viên phù hợp với nhóm sự cố của phiếu để không giao sai người phải chuyển qua chuyển lại. | MUST |
 | **US3** | Là **quản lý trung tâm**, tôi muốn phân công một phiếu cho một kỹ thuật viên để biết chắc ai đang giữ phiếu từ lúc nào. | MUST |
 | **US4** | Là **quản lý trung tâm**, tôi muốn đổi kỹ thuật viên của phiếu kèm lý do để việc chuyển giao có vết, không mất trách nhiệm. | SHOULD |
-| **US5** | Là **quản lý trung tâm**, tôi muốn đặt lịch hẹn giao – nhận máy và được chặn khi trùng lịch kỹ thuật viên để không phải gọi hẹn lại khách. | MUST |
+| **US5** | Là **quản lý trung tâm**, tôi muốn đặt lịch hẹn giao – nhận máy không trùng với lịch hẹn khác của kỹ thuật viên để không phải gọi hẹn lại khách. | SHOULD |
 | **US6** | Là **kỹ thuật viên**, tôi muốn xem danh sách phiếu được giao cho tôi sắp theo hạn cam kết để ưu tiên xử lý phiếu sắp quá hạn trước. | SHOULD |
 | **US7** | Là **quản lý trung tâm**, tôi muốn xem số phiếu đang giữ và số phiếu quá hạn của từng kỹ thuật viên để chia việc đều và không phải đếm tay cuối tháng. | SHOULD |
+| **US8** | Là **quản lý trung tâm**, tôi muốn xem lịch sử của một phiếu (ai phân công, đổi kỹ thuật viên khi nào, vì sao) để truy được trách nhiệm khi phiếu bị quá hạn. | COULD |
 
-**Tiêu chí chấp nhận cho story MUST (Given – When – Then):**
-- **US1** – AC1: GIVEN 3 phiếu MOI hạn 10:00, 08:00, 15:00, WHEN quản lý mở danh sách, THEN thứ tự hiển thị là 08:00, 10:00, 15:00. AC2: GIVEN phiếu MOI của trung tâm khác, WHEN mở danh sách, THEN phiếu đó không xuất hiện.
-- **US2** – AC1: GIVEN phiếu MAN_HINH, KTV A (tay nghề 4, 2 phiếu mở), B (5, 2), C (3, 5), D (2, 0), WHEN xem gợi ý, THEN thứ tự B, A, C, không có D. AC2: GIVEN không ai thỏa điều kiện, WHEN xem gợi ý, THEN danh sách rỗng kèm thông báo "Không có kỹ thuật viên đủ tay nghề tại trung tâm".
-- **US3** – AC1: GIVEN phiếu MOI và KTV A trong danh sách gợi ý, WHEN xác nhận phân công, THEN phiếu chuyển DA_PHAN_CONG, có 1 dòng lịch sử MOI → DA_PHAN_CONG. AC2: GIVEN phiếu đã DA_PHAN_CONG, WHEN phân công lần nữa, THEN bị từ chối. AC3: GIVEN KTV không thỏa QT-08, WHEN phân công, THEN bị từ chối, phiếu giữ MOI.
-- **US5** – AC1: GIVEN KTV A có lịch hẹn 09:00–09:30, WHEN tạo lịch hẹn 09:15–09:45, THEN bị từ chối và hiển thị lịch hẹn trùng. AC2: GIVEN khung 10:00–10:30 trống, WHEN tạo lịch hẹn TRA_MAY, THEN lưu ở trạng thái DA_HEN. AC3: GIVEN phiếu MOI chưa có KTV, WHEN tạo lịch hẹn, THEN bị từ chối.
+**Lý do xếp mức:** 3 story MUST (US1, US2, US3) tạo thành luồng tối thiểu *thấy phiếu → được gợi ý → phân công*; thiếu một story thì L4 không chạy được. US5 để SHOULD vì có cách làm tạm (quản lý gọi điện hẹn khách như hiện nay – Mục 6.1 bước 11). US8 để COULD vì chỉ đọc dữ liệu đã ghi, không ảnh hưởng luồng chính.
+
+**Tiêu chí chấp nhận (Given – When – Then)** cho 3 story MUST, kèm US5 vì có quy tắc chặn trùng lịch cần kiểm thử. Tổng 10 tiêu chí, trong đó 6 tiêu chí *(ngoại lệ)*; mỗi story MUST có ít nhất 1 tiêu chí ngoại lệ:
+- **US1** – AC1: GIVEN trung tâm Tân Bình có 3 phiếu MOI hạn 10:00, 08:00, 15:00, WHEN chị Trâm (quản lý) mở danh sách, THEN thứ tự hiển thị là 08:00, 10:00, 15:00. AC2 *(ngoại lệ)*: GIVEN có phiếu MOI của trung tâm Quận 10, WHEN quản lý trung tâm Tân Bình mở danh sách, THEN phiếu đó không xuất hiện (QT-14).
+- **US2** – AC1: GIVEN phiếu MAN_HINH, KTV A (tay nghề 4, 2 phiếu mở), B (5, 2), C (3, 5), D (2, 0), WHEN xem gợi ý, THEN thứ tự B, A, C, không có D. AC2 *(ngoại lệ)*: GIVEN không ai thỏa điều kiện, WHEN xem gợi ý, THEN danh sách rỗng kèm thông báo "Không có kỹ thuật viên đủ tay nghề tại trung tâm".
+- **US3** – AC1: GIVEN phiếu MOI và KTV A trong danh sách gợi ý, WHEN xác nhận phân công, THEN phiếu chuyển DA_PHAN_CONG, có 1 dòng lịch sử MOI → DA_PHAN_CONG. AC2 *(ngoại lệ)*: GIVEN phiếu đã DA_PHAN_CONG, WHEN phân công lần nữa, THEN bị từ chối. AC3 *(ngoại lệ)*: GIVEN KTV không thỏa QT-08, WHEN phân công, THEN bị từ chối, phiếu giữ MOI.
+- **US5** – AC1 *(ngoại lệ)*: GIVEN KTV A có lịch hẹn 09:00–09:30, WHEN tạo lịch hẹn 09:15–09:45, THEN bị từ chối và hiển thị lịch hẹn trùng. AC2: GIVEN khung 10:00–10:30 trống, WHEN tạo lịch hẹn TRA_MAY, THEN lưu ở trạng thái DA_HEN. AC3 *(ngoại lệ)*: GIVEN phiếu MOI chưa có KTV, WHEN tạo lịch hẹn, THEN bị từ chối.
 
 ## 4. Yêu cầu phi chức năng
 
@@ -104,13 +108,14 @@ Khách hàng là người hưởng lợi, không thao tác trực tiếp: quản
 | FR2 | Gợi ý tối đa 3 kỹ thuật viên theo QT-08 | US2 | UC2 | MUST | TC03, TC04 |
 | FR3 | Phân công phiếu MOI, ghi lịch sử phiếu | US3 | UC3 | MUST | TC05, TC06, TC07 |
 | FR4 | Đổi kỹ thuật viên kèm lý do | US4 | UC4 | SHOULD | TC08, TC09 |
-| FR5 | Tạo lịch hẹn, chặn trùng lịch | US5 | UC5 | MUST | TC10, TC11, TC12 |
+| FR5 | Tạo lịch hẹn, chặn trùng lịch | US5 | UC5 | SHOULD | TC10, TC11, TC12 |
 | FR6 | Danh sách phiếu của kỹ thuật viên | US6 | UC6 | SHOULD | TC13 |
 | FR7 | Bảng khối lượng công việc | US7 | UC7 | SHOULD | TC14 |
+| FR8 | Lịch sử phiếu | US8 | UC8 | COULD | TC15 |
 
 *Cột Test case là mã dự kiến, nội dung chi tiết viết ở BT3. Mỗi tiêu chí chấp nhận ở mục 3 ứng với ít nhất một test case.*
 
-**Thay đổi so với phiên bản 1.0 (Buổi 3):** giảm từ 9 xuống 7 User Story theo đề BT1 (mục 2.1); story "kỹ thuật viên cập nhật trạng thái" chuyển thành W4, story "cảnh báo phiếu chờ linh kiện" bỏ khỏi phạm vi; lịch sử đổi kỹ thuật viên gộp vào `ticket_status_log`; bỏ yêu cầu che số điện thoại vì L4 không hiển thị thông tin khách hàng. Thứ tự US1–US7 giữ đúng như phiếu phạm vi đã nộp.
+**Thay đổi so với bản nháp Buổi 3:** giữ 8 User Story với 3 story MUST theo checklist Buổi 4 (US5 hạ xuống SHOULD, thêm US8 mức COULD); story "kỹ thuật viên cập nhật tiến độ sửa chữa" chuyển thành W4 để phạm vi chỉ còn một luồng phân công và lịch hẹn; lịch sử đổi kỹ thuật viên ghi chung vào `ticket_status_log`; gắn nhãn *(ngoại lệ)* cho các tiêu chí chấp nhận ngoại lệ.
 
 ---
 
@@ -155,7 +160,7 @@ File gốc: [`usecase.drawio`](usecase.drawio).
 | **Mục tiêu** | Hẹn khách một khung giờ giao máy hoặc trả máy mà kỹ thuật viên chắc chắn rảnh |
 | **Điều kiện trước** | Phiếu thuộc trung tâm của quản lý, là phiếu đang mở và đã có kỹ thuật viên |
 | **Điều kiện sau** | Một lịch hẹn DA_HEN được lưu, không giao nhau với lịch hẹn khác của kỹ thuật viên |
-| **Liên quan** | US5 · FR5 · QT-L4-02, QT-L4-03, QT-L4-04 · MUST |
+| **Liên quan** | US5 · FR5 · QT-L4-02, QT-L4-03, QT-L4-04 · SHOULD |
 
 **Luồng chính**
 1. Quản lý mở phiếu và chọn "Đặt lịch hẹn".

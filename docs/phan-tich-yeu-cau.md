@@ -25,19 +25,19 @@ Tài liệu làm việc cho Buổi 3 – 4: áp bộ mười câu hỏi khai th�
 | 6 | Thông tin nào BẮT BUỘC trước khi tạo bản ghi? | Phân công: phiếu + KTV. Lịch hẹn: phiếu đã có KTV + khung giờ. Đổi KTV: lý do (QT-07). | Bảng validation E3, E5, E6 |
 | 7 | Thông tin nào không được sửa sau khi lưu? | Lịch sử trạng thái, lịch sử đổi KTV (QT-06, QT-07); không xóa vật lý (QT-13). | Log chỉ thêm, không sửa; lịch hẹn chỉ hủy |
 | 8 | Quy tắc nghiệp vụ nào đang áp dụng? | QT-04, QT-06, QT-07, QT-08, QT-13, QT-14, QT-15. | Mục 5 SRS |
-| 9 | Khi điều kiện bình thường không thỏa thì xử lý thế nào? | Xem mục 3 dưới đây. | Luồng ngoại lệ UC3, UC5 |
-| 10 | Trường hợp nào phải làm thủ công ngoài hệ thống? | Không có KTV đủ tay nghề tại trung tâm; lỗi hàng loạt cùng lô (anh Dũng: "sửa lần thứ ba cùng lỗi thì báo lên"). | UC3 ngoại lệ 3a; báo lỗi lô: WON'T (ngoài L4) |
+| 9 | Khi điều kiện bình thường không thỏa thì xử lý thế nào? | Xem mục 3 dưới đây. | Luồng ngoại lệ UC2, UC4 |
+| 10 | Trường hợp nào phải làm thủ công ngoài hệ thống? | Không có KTV đủ tay nghề tại trung tâm; lỗi hàng loạt cùng lô (anh Dũng: "sửa lần thứ ba cùng lỗi thì báo lên"). | UC2 ngoại lệ 3a; báo lỗi lô: WON'T (ngoài L4) |
 
 ## 3. Ngoại lệ tìm được (câu 9)
 
 | # | Tình huống | Xử lý đề xuất | Đưa vào |
 |---|---|---|---|
-| N1 | Không có KTV nào cùng trung tâm đủ tay nghề ≥ 3 | Báo rõ, phiếu giữ trạng thái Mới, quản lý xử lý ngoài hệ thống | UC3 – 3a |
-| N2 | Hai quản lý cùng phân công một phiếu | Chỉ người đầu tiên thành công; người sau nhận thông báo đã phân công | UC3 – 5a, NFR3 |
-| N3 | KTV nghỉ việc / bị chỉnh tay nghề giữa lúc đang chọn | Kiểm tra lại khi xác nhận, tải lại gợi ý | UC3 – 5b |
-| N4 | Mất kết nối khi đang lưu phân công | Hủy giao dịch, cho phép thử lại, không sinh log trùng | UC3 – 6a |
-| N5 | Đặt lịch hẹn trùng giờ KTV | Từ chối, gợi ý khung giờ trống gần nhất | UC5 – 5a |
-| N6 | Đặt lịch hẹn cho phiếu chưa phân công | Từ chối, dẫn tới chức năng phân công | UC5 – 1a |
+| N1 | Không có KTV nào cùng trung tâm đủ tay nghề ≥ 3 | Báo rõ, phiếu giữ trạng thái Mới, quản lý xử lý ngoài hệ thống | UC2 – 3a |
+| N2 | Hai quản lý cùng phân công một phiếu | Chỉ người đầu tiên thành công; người sau nhận thông báo đã phân công | UC2 – 5a, NFR3 |
+| N3 | KTV nghỉ việc / bị chỉnh tay nghề giữa lúc đang chọn | Kiểm tra lại khi xác nhận, tải lại gợi ý | UC2 – 5b |
+| N4 | Mất kết nối khi đang lưu phân công | Hủy giao dịch, cho phép thử lại, không sinh log trùng | UC2 – 6a |
+| N5 | Đặt lịch hẹn trùng giờ KTV | Từ chối, gợi ý khung giờ trống gần nhất | UC4 – 5a |
+| N6 | Đặt lịch hẹn cho phiếu chưa phân công | Từ chối, dẫn tới chức năng phân công | UC4 – 1a |
 | N7 | Đổi KTV khi phiếu đã có lịch hẹn | Hủy lịch hẹn chưa diễn ra, yêu cầu đặt lại | QT-L4-05 |
 | N8 | Phiếu nằm Chờ linh kiện quá lâu (6.1 bước 9: có phiếu 3 tuần) | Hiển thị trong bảng khối lượng công việc (phiếu quá hạn); cảnh báo tự động để hướng mở rộng | US7 |
 | N9 | Phân công lại phiếu đã có KTV bằng chức năng phân công | Từ chối, yêu cầu dùng chức năng đổi KTV (QT-L4-01) | FR3, E3 |
@@ -50,7 +50,7 @@ Tài liệu làm việc cho Buổi 3 – 4: áp bộ mười câu hỏi khai th�
 | Anh Dũng: "Em không biết cái nào gấp, thường làm cái dễ trước" | Vì xấp phiếu giấy không có thứ tự | Danh sách phiếu của KTV phải **sắp theo hạn cam kết** và **đánh dấu phiếu sắp quá hạn** (FR6) |
 | Chị Trâm: "Giao sai người thì mất thời gian chuyển qua lại" | Vì mỗi KTV giỏi một nhóm sự cố khác nhau | Chỉ gợi ý KTV có **tay nghề ≥ 3 ở đúng nhóm sự cố** (QT-08, FR2); đổi người phải **có lý do** để truy được (FR4) |
 
-## 5. Tự kiểm INVEST cho 8 User Story
+## 5. Tự kiểm INVEST cho 9 User Story
 
 | Story | I | N | V | E | S | T | Ghi chú |
 |---|---|---|---|---|---|---|---|
@@ -62,6 +62,7 @@ Tài liệu làm việc cho Buổi 3 – 4: áp bộ mười câu hỏi khai th�
 | US6 Danh sách của KTV | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | |
 | US7 Khối lượng công việc | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | |
 | US8 Lịch sử phiếu | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | Chỉ đọc `ticket_status_log` đã có |
+| US9 Hủy lịch hẹn | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | Chỉ đổi `appointment.status` sang DA_HUY |
 
 **Đã sửa so với bản nháp Buổi 2:**
 - Bản nháp "hệ thống **gợi ý 3 kỹ thuật viên** (cùng trung tâm, tay nghề ≥ 3, ít việc nhất)" chứa chi tiết hiện thực → đưa chi tiết sang FR2 và tiêu chí chấp nhận, story chỉ giữ mục tiêu (tiêu chí **N**).

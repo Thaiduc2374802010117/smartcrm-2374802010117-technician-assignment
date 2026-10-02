@@ -7,8 +7,8 @@ File gốc: [`architecture.drawio`](architecture.drawio). Kiến trúc chọn: *
 | Lớp | Trách nhiệm | Trao đổi với lớp khác |
 |---|---|---|
 | ① Giao diện | Hiển thị 3 màn hình (xem wireframe), kiểm tra nhập liệu cơ bản; không chứa quy tắc nghiệp vụ | Gửi HTTP/JSON tới lớp API, kèm header `X-Employee-Id` |
-| ② API | Nhận request theo API contract (E1–E8), kiểm tra kiểu dữ liệu, kiểm tra quyền dùng chung (vai trò + trung tâm), trả mã HTTP thống nhất | Gọi hàm Python của lớp Nghiệp vụ; không truy cập CSDL trực tiếp |
-| ③ Nghiệp vụ | Áp dụng quy tắc: gợi ý và phân công (QT-06, QT-07, QT-08, QT-L4-01), lịch hẹn (QT-L4-02…05), truy vấn danh sách và khối lượng công việc | Gọi hàm Python của lớp Truy cập dữ liệu; không biết gì về HTTP |
+| ② API | Nhận request theo API contract (E1–E10), kiểm tra kiểu dữ liệu, kiểm tra quyền dùng chung (vai trò + trung tâm), trả mã HTTP thống nhất | Gọi hàm Python của lớp Nghiệp vụ; không truy cập CSDL trực tiếp |
+| ③ Nghiệp vụ | Áp dụng quy tắc: gợi ý và phân công (QT-06, QT-07, QT-08, QT-L4-01), lịch hẹn (QT-L4-02…05), truy vấn danh sách, khối lượng công việc và lịch sử phiếu | Gọi hàm Python của lớp Truy cập dữ liệu; không biết gì về HTTP |
 | ④ Truy cập dữ liệu | Câu SQL tham số hóa, mở/đóng giao dịch, UPDATE có điều kiện | Gửi SQL tới PostgreSQL qua TCP cổng 5432 |
 | ⑤ Cơ sở dữ liệu | Lưu 6 bảng chính; ràng buộc khóa, CHECK, EXCLUDE; index | Chỉ nhận kết nối từ lớp ④ |
 
@@ -51,7 +51,7 @@ File gốc: [`schema.dbml`](schema.dbml) (dbdiagram.io) · SQL DDL: [`schema.sql
 | Màn hình | Dạng | Use case | Trường hiển thị → cột trong ERD |
 |---|---|---|---|
 | 1. Danh sách phiếu chờ phân công | Danh sách | UC1 | Mã phiếu `ticket.ticket_code` · Nhóm sự cố `issue_category.category_name` · Mức ưu tiên `ticket.priority` · Thời điểm tiếp nhận `ticket.received_at` · Hạn cam kết `ticket.due_date` |
-| 2. Phân công kỹ thuật viên | Chi tiết + sửa | UC2, UC3, UC4 | Kỹ thuật viên `employee.full_name` · Bậc `technician.level` · Tay nghề `technician_skill.proficiency` · Số phiếu đang mở (đếm `ticket`) · Mô tả lỗi `ticket.issue_desc` · Lý do đổi `ticket_status_log.note` |
-| 3. Đặt lịch hẹn giao – nhận máy | Tạo mới | UC5 | Loại lịch hẹn `appointment.appointment_type` · Bắt đầu `appointment.start_at` · Kết thúc `appointment.end_at` · Ghi chú `appointment.note` |
+| 2. Phân công kỹ thuật viên | Chi tiết + sửa | UC2, UC3 | Kỹ thuật viên `employee.full_name` · Bậc `technician.level` · Tay nghề `technician_skill.proficiency` · Số phiếu đang mở (đếm `ticket`) · Mô tả lỗi `ticket.issue_desc` · Lý do đổi `ticket_status_log.note` |
+| 3. Đặt lịch hẹn giao – nhận máy | Tạo mới | UC4, UC8 | Loại lịch hẹn `appointment.appointment_type` · Bắt đầu `appointment.start_at` · Kết thúc `appointment.end_at` · Ghi chú `appointment.note` |
 
-UC6 (danh sách phiếu của kỹ thuật viên) và UC7 (bảng khối lượng công việc) dùng lại bố cục bảng của Màn hình 1, không vẽ riêng.
+UC5 (danh sách phiếu của kỹ thuật viên), UC6 (bảng khối lượng công việc) và UC7 (lịch sử phiếu – đọc `ticket_status_log`) dùng lại bố cục bảng của Màn hình 1, không vẽ riêng.

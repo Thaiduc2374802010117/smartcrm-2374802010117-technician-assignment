@@ -2,7 +2,7 @@
 ## Phân công kỹ thuật viên và lịch hẹn giao – nhận máy bảo hành
 
 Sinh viên: Nguyễn Thái Đức – MSSV 2374802010117 – Track SE
-Tài liệu bổ sung kỹ thuật cho [SRS](srs.md). Mọi endpoint truy vết về User Story và bảng truy vết mục 6 của SRS (phiên bản 1.2).
+Tài liệu bổ sung kỹ thuật cho [SRS](srs.md). Mọi endpoint truy vết về User Story US1–US9 và bảng truy vết mục 6 của SRS (phiên bản 1.2).
 
 ---
 
@@ -19,6 +19,7 @@ Tài liệu bổ sung kỹ thuật cho [SRS](srs.md). Mọi endpoint truy vết 
 | E7 | GET | `/api/me/tickets` | Danh sách phiếu đang mở của kỹ thuật viên đang dùng | US6 | FR6 | Kỹ thuật viên |
 | E8 | GET | `/api/workload` | Bảng khối lượng công việc của trung tâm | US7 | FR7 | Quản lý |
 | E9 | GET | `/api/tickets/{ticket_id}/history` | Lịch sử phiếu: chuyển trạng thái, đổi kỹ thuật viên | US8 | FR8 | Quản lý |
+| E10 | PATCH | `/api/appointments/{appointment_id}/cancel` | Hủy lịch hẹn kèm lý do | US9 | FR9 | Quản lý |
 
 Các endpoint `GET /` và `GET /db-check` là smoke test hạ tầng của Buổi 2, không phục vụ User Story nên **không thuộc hợp đồng này**.
 Việc kỹ thuật viên cập nhật tiến độ sửa chữa là W4 trong SRS nên không có endpoint.
@@ -119,7 +120,7 @@ Quy tắc (QT-08): `is_active = true`, cùng `center_id` với phiếu, `profici
   ]
 }
 ```
-**Response 200 – không có ai phù hợp** (không phải lỗi; UC3 ngoại lệ 3a)
+**Response 200 – không có ai phù hợp** (không phải lỗi; UC2 ngoại lệ 3a)
 ```json
 { "ticket_id": 88231, "category_name": "MAN_HINH", "suggestions": [],
   "message": "Không có kỹ thuật viên đủ tay nghề tại trung tâm" }
@@ -158,13 +159,13 @@ Quy tắc (QT-08): `is_active = true`, cùng `center_id` với phiếu, `profici
   "fields": { "technician_id": "Trường bắt buộc, phải là số nguyên dương" } } }
 ```
 **Response 404** – phiếu hoặc kỹ thuật viên không tồn tại.
-**Response 409** – phiếu không còn ở trạng thái Mới (đã được phân công, UC3 ngoại lệ 5a)
+**Response 409** – phiếu không còn ở trạng thái Mới (đã được phân công, UC2 ngoại lệ 5a)
 ```json
 { "error": { "code": "INVALID_STATE",
   "message": "Phiếu đã được phân công cho kỹ thuật viên khác. Dùng chức năng đổi kỹ thuật viên.",
   "fields": { "current_status": "DA_PHAN_CONG", "technician_id": "7" } } }
 ```
-**Response 422** – kỹ thuật viên không thỏa QT-08 (UC3 ngoại lệ 5b)
+**Response 422** – kỹ thuật viên không thỏa QT-08 (UC2 ngoại lệ 5b)
 ```json
 { "error": { "code": "TECHNICIAN_NOT_ELIGIBLE",
   "message": "Kỹ thuật viên không đủ tay nghề (cần ≥ 3) hoặc không cùng trung tâm",
@@ -214,12 +215,12 @@ Lịch hẹn tự gắn với kỹ thuật viên **đang giữ phiếu** (QT-L4-
   "created_by": 3
 }
 ```
-**Response 400** – sai định dạng thời gian, `end_at` ≤ `start_at`, ngoài giờ làm việc (UC5 ngoại lệ 4a)
+**Response 400** – sai định dạng thời gian, `end_at` ≤ `start_at`, ngoài giờ làm việc (UC4 ngoại lệ 4a)
 ```json
 { "error": { "code": "VALIDATION_FAILED", "message": "Khung giờ không hợp lệ",
   "fields": { "start_at": "Lịch hẹn phải trong 08:00–18:00, thứ Hai đến thứ Bảy" } } }
 ```
-**Response 409** – trùng lịch kỹ thuật viên (UC5 ngoại lệ 5a, QT-L4-02)
+**Response 409** – trùng lịch kỹ thuật viên (UC4 ngoại lệ 5a, QT-L4-02)
 ```json
 { "error": { "code": "APPOINTMENT_CONFLICT", "message": "Kỹ thuật viên đã có lịch hẹn trong khung giờ này",
   "fields": { "conflict_appointment_id": "301",
@@ -227,7 +228,7 @@ Lịch hẹn tự gắn với kỹ thuật viên **đang giữ phiếu** (QT-L4-
               "conflict_end_at": "2026-10-10T09:30:00+07:00",
               "suggested_start_at": "2026-10-10T09:30:00+07:00" } } }
 ```
-**Response 422** – phiếu chưa có kỹ thuật viên (UC5 ngoại lệ 1a)
+**Response 422** – phiếu chưa có kỹ thuật viên (UC4 ngoại lệ 1a)
 ```json
 { "error": { "code": "TICKET_NOT_ASSIGNED", "message": "Phiếu chưa được phân công", "fields": {} } }
 ```
@@ -242,6 +243,7 @@ Lịch hẹn tự gắn với kỹ thuật viên **đang giữ phiếu** (QT-L4-
 | **E6** PUT `/api/tickets/{id}/assignment` | `{ "technician_id": 7, "reason": "KTV B nghỉ phép đột xuất" }` | 200 – phiếu với `technician_id` mới, dòng `status_log` có `from_technician_id`, `to_technician_id`, `note` = lý do; lịch hẹn chưa diễn ra bị hủy (QT-L4-05) | 400 thiếu lý do · 409 phiếu không đang mở hoặc chọn trùng KTV hiện tại · 422 KTV mới không thỏa QT-08 |
 | **E7** GET `/api/me/tickets` | Query `page`, `size` | 200 – danh sách phiếu đang mở của KTV, sắp theo `due_date`, có `is_due_soon`, `is_overdue` | 401 thiếu người dùng · 403 không phải KTV |
 | **E9** GET `/api/tickets/{id}/history` | Không | 200 – `[{ log_id, from_status, to_status, from_technician_id, to_technician_id, note, changed_at, changed_by }]` sắp theo `changed_at` tăng dần | 403 phiếu thuộc trung tâm khác · 404 phiếu không tồn tại |
+| **E10** PATCH `/api/appointments/{id}/cancel` | `{ "reason": "Khách báo bận, hẹn lại tuần sau" }` | 200 – lịch hẹn với `status` = `DA_HUY` | 400 thiếu lý do (10–255 ký tự) · 404 lịch hẹn không tồn tại · 409 lịch hẹn đã hủy hoặc đã qua giờ bắt đầu (QT-L4-06) |
 | **E8** GET `/api/workload` | Không | 200 – `[{ technician_id, full_name, open_ticket_count, due_soon_count, overdue_count }]` | 401 thiếu người dùng · 403 không phải Quản lý |
 
 ---
@@ -294,7 +296,7 @@ Phiên bản hiện tại **giả lập** người dùng (W8 trong SRS): mỗi r
 
 | Endpoint | Quản lý trung tâm | Kỹ thuật viên |
 |---|---|---|
-| E1, E2, E3, E4, E5, E6, E8, E9 | ✅ trong trung tâm mình | ❌ 403 |
+| E1, E2, E3, E4, E5, E6, E8, E9, E10 | ✅ trong trung tâm mình | ❌ 403 |
 | E7 | ❌ 403 | ✅ phiếu của chính mình |
 
 Thiếu header hoặc mã không tồn tại → **401**. Đúng vai trò nhưng khác trung tâm → **403** (QT-14).

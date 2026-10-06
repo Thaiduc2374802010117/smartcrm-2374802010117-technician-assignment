@@ -34,7 +34,7 @@ CREATE TABLE issue_category (
 CREATE TABLE technician (
     technician_id  BIGSERIAL PRIMARY KEY,
     employee_id    BIGINT NOT NULL UNIQUE REFERENCES employee(employee_id),
-    center_id      INT    NOT NULL REFERENCES service_center(center_id),
+    -- 3NF: trung tâm làm việc lấy qua employee.center_id, không lưu lặp ở đây
     level          VARCHAR(10) NOT NULL CHECK (level IN ('SO_CAP', 'TRUNG_CAP', 'CAO_CAP')),
     is_active      BOOLEAN NOT NULL DEFAULT true
 );

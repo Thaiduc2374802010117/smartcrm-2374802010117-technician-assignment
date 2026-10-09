@@ -1,20 +1,18 @@
 # Phụ lục – Bảng khai báo sử dụng công cụ AI
 
-| Công cụ | Dùng vào việc gì | Áp dụng ở phần nào | Đã kiểm chứng thế nào |
+| Công cụ | Phần áp dụng | Cách dùng (tóm tắt yêu cầu đã gửi) | Em đã chỉnh sửa / kiểm chứng gì |
 |---|---|---|---|
-| Claude (Anthropic) | Gợi ý bản nháp phiếu phạm vi, README khung, hướng dẫn cấu hình Git và cài môi trường; gợi ý mã smoke test FastAPI | Buổi 2: phiếu phạm vi, repo, `src/backend/main.py` | Tự cấu hình Git, tạo repo, cài Python/PostgreSQL; tự chạy `/` và `/db-check` trên máy, tự sửa lỗi mật khẩu và thiếu database |
-| Claude (Anthropic) | Gợi ý bản nháp SRS, User Story, tiêu chí chấp nhận, đặc tả UC3/UC5, API contract | Mục 1 SRS, Mục 2 Use Case, `api-contract.md` | Đối chiếu từng yêu cầu với case study (Bảng 2.2, 3.1, 9.1, Hình 6.2); đối chiếu thứ tự US1–US7 với phiếu phạm vi đã nộp; rút từ 9 xuống 7 User Story theo đề BT1 |
-| Claude (Anthropic) | Gợi ý bố cục sơ đồ Use Case, sơ đồ kiến trúc, ERD, SQL DDL và wireframe | Mục 2, 3, 4, 5 | Kiểm tra lập luận kiến trúc có mã NFR và đánh đổi; kiểm tra ERD đủ khóa chính, khóa ngoại; kiểm tra mọi trường trên wireframe có trong ERD; Ctrl+F từng thuật ngữ trong bảng thuật ngữ |
+| Claude (trợ lý AI dạng chat) | Buổi 2: phiếu phạm vi, README, cấu trúc repo, `src/backend/main.py` | "Đọc file buổi 2 và làm các yêu cầu cho luồng L4"; "chỉ tôi thiết lập Git repo theo yêu cầu đề" | Tự chọn stack Python 3.12 + FastAPI, HTML/CSS/JS; tự cấu hình Git bằng email trường, tạo repo, tự phát hiện lỗi tên repo thừa dấu "-"; tự cài Python, PostgreSQL; sửa lỗi sai mật khẩu và lỗi chưa tạo database theo thông báo lỗi; chạy `/` và `/db-check` thành công |
+| Claude | Mục 1 – SRS, 7 User Story, tiêu chí Given–When–Then | "Đọc 2 file buổi 3 và làm đầy đủ yêu cầu"; "làm theo đúng yêu cầu buổi 4"; "đọc kĩ yêu cầu buổi 6" | Chọn làm theo checklist Buổi 4 (8 story, 3 MUST), rồi rút về 7 story khi nộp BT1 theo yêu cầu 5–7; đối chiếu vấn đề V2, V3 và quy tắc QT-04, QT-06, QT-07, QT-08 với case study; đối chiếu thứ tự US1–US7 với phiếu phạm vi đã nộp |
+| Claude | Mục 2 – Use Case Diagram, đặc tả UC2, UC4 | "Use case phải là use case mạnh" (theo nhắc nhở của thầy trên lớp) | Đưa yêu cầu "use case mạnh" của thầy vào; đồng ý bỏ use case yếu "Xem gợi ý kỹ thuật viên" sau khi áp phép thử "làm xong actor có đạt mục tiêu không"; mở `usecase.drawio` bằng draw.io để kiểm tra file gốc |
+| Claude | Mục 3 – Kiến trúc; Mục 4 – ERD, SQL DDL | "Đọc file buổi 5 và làm 4 việc thầy giao" | Đối chiếu sơ đồ với mẫu kiến trúc 4 lớp của slide Buổi 5; kiểm 4 câu lập luận theo khuôn "Vì NFR… tôi chọn… đánh đổi là…"; soát 5 lỗi ERD và 3NF (sửa phụ thuộc bắc cầu `technician.center_id`) |
+| Claude | Mục 5 – Wireframe; rà soát nhất quán | "Đọc kĩ file buổi 6 làm cho tôi" | Chạy 6 phép kiểm nhất quán và 11 mục kiểm chứng; kiểm từng trường wireframe có cột trong ERD; kiểm 7 luồng ngoại lệ có chỗ hiển thị thông báo |
 
 **Phần em tự làm:**
 
-- Tự chọn luồng L4 ở buổi 1 và đối chiếu mô tả luồng L4 trong case study (Mục 7) với phiếu phạm vi; tự chọn Track SE và công nghệ Python 3.12 + FastAPI, HTML/CSS/JavaScript, PostgreSQL 16.
-- Tự gắn email trường vào tài khoản GitHub, cấu hình Git, tạo repo `smartcrm-2374802010117-technician-assignment`, tự phát hiện và sửa lỗi tên repo thừa dấu "-" gây lỗi *Repository not found*.
-- Tự dựng cấu trúc thư mục Track SE, `.gitignore`, `.env.example`; tự commit theo Conventional Commits, tạo nhánh `main`/`dev` và merge `dev` vào `main` sau mỗi lần cập nhật.
-- Tự cài Python 3.12.9, PostgreSQL 16 và pgAdmin; tự xử lý lỗi Windows chặn lệnh `python` (dùng `py`) và lỗi chặn chạy script khi kích hoạt môi trường ảo.
-- Tự tạo database `smartcrm`, tạo file `.env`, chạy backend và kiểm tra `/` trả về "Hello Smart CRM", `/db-check` trả về `status: OK`; tự sửa lỗi sai mật khẩu và lỗi chưa tạo database dựa trên thông báo lỗi.
-- Tự đưa các tài liệu SRS, sơ đồ, ERD, wireframe vào `docs/`, thay bản cũ bằng bản đúng đề BT1 và đẩy lên GitHub.
+- Chọn luồng L4 và Track SE; tự thực hiện toàn bộ thao tác trên máy: tạo repo GitHub, cài đặt môi trường, chạy backend, commit theo Conventional Commits và merge `dev` vào `main` sau mỗi lần cập nhật.
+- Đọc lại, đối chiếu tài liệu với case study Mekong Mobile và các slide Buổi 2 – 6; quyết định các điểm thay đổi phạm vi (số User Story, bỏ use case yếu).
 
 Tôi xác nhận đã đọc, hiểu và chịu trách nhiệm về toàn bộ nội dung nộp.
 
-Họ tên: Nguyễn Thái Đức · MSSV: 2374802010117 · Ngày: 29/09/2026
+Họ tên: Nguyễn Thái Đức · MSSV: 2374802010117 · Ngày: 09/10/2026

@@ -50,7 +50,7 @@ Tài liệu làm việc cho Buổi 3 – 4: áp bộ mười câu hỏi khai th�
 | Anh Dũng: "Em không biết cái nào gấp, thường làm cái dễ trước" | Vì xấp phiếu giấy không có thứ tự | Danh sách phiếu của KTV phải **sắp theo hạn cam kết** và **đánh dấu phiếu sắp quá hạn** (FR6) |
 | Chị Trâm: "Giao sai người thì mất thời gian chuyển qua lại" | Vì mỗi KTV giỏi một nhóm sự cố khác nhau | Chỉ gợi ý KTV có **tay nghề ≥ 3 ở đúng nhóm sự cố** (QT-08, FR2); đổi người phải **có lý do** để truy được (FR4) |
 
-## 5. Tự kiểm INVEST cho 9 User Story
+## 5. Tự kiểm INVEST cho 7 User Story
 
 | Story | I | N | V | E | S | T | Ghi chú |
 |---|---|---|---|---|---|---|---|
@@ -61,13 +61,11 @@ Tài liệu làm việc cho Buổi 3 – 4: áp bộ mười câu hỏi khai th�
 | US5 Đặt lịch hẹn | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | Kiểm thử bằng phiếu đã phân công sẵn |
 | US6 Danh sách của KTV | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | |
 | US7 Khối lượng công việc | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | |
-| US8 Lịch sử phiếu | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | Chỉ đọc `ticket_status_log` đã có |
-| US9 Hủy lịch hẹn | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | Chỉ đổi `appointment.status` sang DA_HUY |
 
 **Đã sửa so với bản nháp Buổi 2:**
 - Bản nháp "hệ thống **gợi ý 3 kỹ thuật viên** (cùng trung tâm, tay nghề ≥ 3, ít việc nhất)" chứa chi tiết hiện thực → đưa chi tiết sang FR2 và tiêu chí chấp nhận, story chỉ giữ mục tiêu (tiêu chí **N**).
 - Bản nháp "đổi kỹ thuật viên kèm lý do **bắt buộc**" và "ghi lịch sử trạng thái" → giữ ở FR, không nhồi vào story.
-- Theo checklist Buổi 4: giữ 8 story, 3 MUST (US1, US2, US3); story "KTV cập nhật trạng thái" chuyển thành W4 để phạm vi chỉ còn một luồng.
+- Khi nộp BT1: giữ 7 story (5–7 theo yêu cầu BT1), 3 MUST (US1, US2, US3); story "KTV cập nhật trạng thái" thành W4, "xem lịch sử phiếu" và "hủy lịch hẹn thủ công" thành W9, W10.
 
 ## 6. Tự kiểm bốn lỗi khi phát biểu yêu cầu
 

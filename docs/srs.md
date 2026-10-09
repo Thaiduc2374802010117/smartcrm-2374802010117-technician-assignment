@@ -1,6 +1,6 @@
 # Bản SRS rút gọn – Luồng L4: Phân công kỹ thuật viên và lịch hẹn
 
-Nguyễn Thái Đức – MSSV 2374802010117 – Track SE · Phiên bản 1.2 · Rút gọn theo tinh thần ISO/IEC/IEEE 29148 (không tuân thủ đầy đủ)
+Nguyễn Thái Đức – MSSV 2374802010117 – Track SE · Phiên bản 1.3 (nộp BT1) · Rút gọn theo tinh thần ISO/IEC/IEEE 29148 (không tuân thủ đầy đủ)
 
 ## 1. Giới thiệu và phạm vi
 
@@ -13,7 +13,9 @@ W1 tiếp nhận phiếu, phân loại nhóm sự cố, sinh hạn cam kết (th
 W2 kho linh kiện (L5) · W3 khảo sát hài lòng (L8) ·
 W4 kỹ thuật viên cập nhật tiến độ sửa chữa Đang xử lý → Hoàn tất (thuộc quy trình sửa chữa; L4 chỉ đọc trạng thái) ·
 W5 khách tự đặt lịch hẹn trực tuyến · W6 gửi SMS/Zalo nhắc lịch · W7 phân công tự động không cần người duyệt ·
-W8 đăng nhập và phân quyền đầy đủ (giả lập người dùng bằng mã nhân viên).
+W8 đăng nhập và phân quyền đầy đủ (giả lập người dùng bằng mã nhân viên) ·
+W9 màn hình xem lịch sử phiếu riêng (lịch sử vẫn được GHI ở FR3, FR4; màn hình xem để giai đoạn sau) ·
+W10 quản lý hủy lịch hẹn thủ công (hệ thống chỉ tự hủy lịch hẹn khi đổi kỹ thuật viên – QT-L4-05).
 
 **Bảng thuật ngữ** (trích Bảng 3.1 case study; mỗi khái niệm chỉ dùng MỘT tên trong SRS, sơ đồ, ERD, wireframe):
 
@@ -37,7 +39,7 @@ W8 đăng nhập và phân quyền đầy đủ (giả lập người dùng bằ
 
 | Actor | Được làm | KHÔNG được làm |
 |---|---|---|
-| **Quản lý trung tâm** | Xem phiếu chờ phân công; xem gợi ý; phân công và đổi kỹ thuật viên; đặt lịch hẹn; xem khối lượng công việc; xem lịch sử phiếu; hủy lịch hẹn – chỉ trong trung tâm mình | Xem hoặc phân công phiếu của trung tâm khác (QT-14); xóa phiếu, xóa lịch hẹn (QT-13) |
+| **Quản lý trung tâm** | Xem phiếu chờ phân công; xem gợi ý; phân công và đổi kỹ thuật viên; đặt lịch hẹn; xem khối lượng công việc – chỉ trong trung tâm mình | Xem hoặc phân công phiếu của trung tâm khác (QT-14); xóa phiếu, xóa lịch hẹn (QT-13) |
 | **Kỹ thuật viên** | Xem danh sách phiếu đang mở được giao cho chính mình | Tự nhận phiếu; chuyển phiếu cho người khác; xem phiếu của người khác |
 
 Khách hàng là người hưởng lợi, không thao tác trực tiếp: quản lý đặt lịch hẹn thay khách.
@@ -53,8 +55,6 @@ Khách hàng là người hưởng lợi, không thao tác trực tiếp: quản
 | **FR5** | Hệ thống cho phép tạo lịch hẹn GIAO_MAY hoặc TRA_MAY cho phiếu đã có kỹ thuật viên và từ chối lịch hẹn giao nhau với lịch hẹn DA_HEN khác của cùng kỹ thuật viên. |
 | **FR6** | Hệ thống hiển thị cho kỹ thuật viên các phiếu đang mở được giao cho họ, sắp theo hạn cam kết, đánh dấu phiếu sắp quá hạn và quá hạn. |
 | **FR7** | Hệ thống hiển thị bảng khối lượng công việc của trung tâm: mỗi kỹ thuật viên có số phiếu đang mở, số phiếu sắp quá hạn, số phiếu quá hạn tại thời điểm xem. |
-| **FR8** | Hệ thống hiển thị lịch sử của một phiếu theo thời gian: mỗi dòng gồm trạng thái trước/sau, kỹ thuật viên trước/sau, lý do, thời điểm và người thực hiện. |
-| **FR9** | Hệ thống cho phép hủy lịch hẹn DA_HEN chưa diễn ra với lý do bắt buộc 10–255 ký tự; lịch hẹn chuyển sang DA_HUY (không xóa – QT-13) và khung giờ đó được đặt lại cho lịch hẹn khác. |
 
 | Mã | User Story | MoSCoW |
 |---|---|---|
@@ -65,10 +65,8 @@ Khách hàng là người hưởng lợi, không thao tác trực tiếp: quản
 | **US5** | Là **quản lý trung tâm**, tôi muốn đặt lịch hẹn giao – nhận máy không trùng với lịch hẹn khác của kỹ thuật viên để không phải gọi hẹn lại khách. | SHOULD |
 | **US6** | Là **kỹ thuật viên**, tôi muốn xem danh sách phiếu được giao cho tôi sắp theo hạn cam kết để ưu tiên xử lý phiếu sắp quá hạn trước. | SHOULD |
 | **US7** | Là **quản lý trung tâm**, tôi muốn xem số phiếu đang giữ và số phiếu quá hạn của từng kỹ thuật viên để chia việc đều và không phải đếm tay cuối tháng. | SHOULD |
-| **US8** | Là **quản lý trung tâm**, tôi muốn xem lịch sử của một phiếu (ai phân công, đổi kỹ thuật viên khi nào, vì sao) để truy được trách nhiệm khi phiếu bị quá hạn. | COULD |
-| **US9** | Là **quản lý trung tâm**, tôi muốn hủy lịch hẹn khi khách báo không đến được để khung giờ của kỹ thuật viên được dùng cho khách khác. | COULD |
 
-**Lý do xếp mức:** 3 story MUST (US1, US2, US3) tạo thành luồng tối thiểu *thấy phiếu → được gợi ý → phân công*; thiếu một story thì L4 không chạy được. US5 để SHOULD vì có cách làm tạm (quản lý gọi điện hẹn khách như hiện nay – Mục 6.1 bước 11). US8, US9 để COULD vì không ảnh hưởng luồng chính: US8 chỉ đọc dữ liệu đã ghi, US9 có cách làm tạm là đặt lịch hẹn mới vào khung giờ khác.
+**Lý do xếp mức:** 3 story MUST (US1, US2, US3) tạo thành luồng tối thiểu *thấy phiếu → được gợi ý → phân công*; thiếu một story thì L4 không chạy được. US5 để SHOULD vì có cách làm tạm (quản lý gọi điện hẹn khách như hiện nay – Mục 6.1 bước 11). Story xem lịch sử phiếu và hủy lịch hẹn thủ công (mức COULD ở Buổi 4) chuyển thành W9, W10 để giữ đúng 5–7 User Story theo yêu cầu BT1.
 
 **Tiêu chí chấp nhận (Given – When – Then)** cho 3 story MUST, kèm US5 vì có quy tắc chặn trùng lịch cần kiểm thử. Tổng 10 tiêu chí, trong đó 6 tiêu chí *(ngoại lệ)*; mỗi story MUST có ít nhất 1 tiêu chí ngoại lệ:
 - **US1** – AC1: GIVEN trung tâm Tân Bình có 3 phiếu MOI hạn 10:00, 08:00, 15:00, WHEN chị Trâm (quản lý) mở danh sách, THEN thứ tự hiển thị là 08:00, 10:00, 15:00. AC2 *(ngoại lệ)*: GIVEN có phiếu MOI của trung tâm Quận 10, WHEN quản lý trung tâm Tân Bình mở danh sách, THEN phiếu đó không xuất hiện (QT-14).
@@ -101,25 +99,25 @@ Khách hàng là người hưởng lợi, không thao tác trực tiếp: quản
 | QT-L4-03 | Lịch hẹn dài 15–120 phút, trong 08:00–18:00, thứ Hai–thứ Bảy, bắt đầu sau hiện tại. *Giờ làm việc là giả định, chờ giảng viên xác nhận.* | Phân tích từ QT-04 |
 | QT-L4-04 | Lịch hẹn chỉ tạo cho phiếu đã có kỹ thuật viên và gắn với kỹ thuật viên đang giữ phiếu. | Định nghĩa "Lịch hẹn" |
 | QT-L4-05 | Khi đổi kỹ thuật viên, lịch hẹn DA_HEN chưa diễn ra của phiếu bị hủy và phải đặt lại. | Hệ quả QT-L4-04 |
-| QT-L4-06 | Chỉ hủy được lịch hẹn DA_HEN chưa đến giờ bắt đầu; lịch hẹn đã hủy không khôi phục, muốn hẹn lại thì tạo lịch hẹn mới. | QT-13 |
 
 ## 6. Bảng truy vết yêu cầu
 
-| Mã FR | Yêu cầu (tóm tắt) | User Story | Use Case | MoSCoW | Test case (BT3) |
-|---|---|---|---|---|---|
-| FR1 | Danh sách phiếu MOI theo hạn cam kết | US1 | UC1 | MUST | TC01, TC02 |
-| FR2 | Gợi ý tối đa 3 kỹ thuật viên theo QT-08 | US2 | UC2 | MUST | TC03, TC04 |
-| FR3 | Phân công phiếu MOI, ghi lịch sử phiếu | US3 | UC2 | MUST | TC05, TC06, TC07 |
-| FR4 | Đổi kỹ thuật viên kèm lý do | US4 | UC3 | SHOULD | TC08, TC09 |
-| FR5 | Tạo lịch hẹn, chặn trùng lịch | US5 | UC4 | SHOULD | TC10, TC11, TC12 |
-| FR6 | Danh sách phiếu của kỹ thuật viên | US6 | UC5 | SHOULD | TC13 |
-| FR7 | Bảng khối lượng công việc | US7 | UC6 | SHOULD | TC14 |
-| FR8 | Lịch sử phiếu | US8 | UC7 | COULD | TC15 |
-| FR9 | Hủy lịch hẹn | US9 | UC8 | COULD | TC16 |
+| Mã FR | Yêu cầu (tóm tắt) | User Story | Use Case | MoSCoW | Bảng dữ liệu | Màn hình |
+|---|---|---|---|---|---|---|
+| FR1 | Danh sách phiếu MOI theo hạn cam kết | US1 | UC1 | MUST | ticket, issue_category | M1 Danh sách phiếu |
+| FR2 | Gợi ý tối đa 3 kỹ thuật viên theo QT-08 | US2 | UC2 | MUST | technician, technician_skill, ticket | M2 Phân công |
+| FR3 | Phân công phiếu MOI, ghi lịch sử phiếu | US3 | UC2 | MUST | ticket, ticket_status_log | M2 Phân công |
+| FR4 | Đổi kỹ thuật viên kèm lý do | US4 | UC3 | SHOULD | ticket, ticket_status_log | M2 (ô lý do đổi) |
+| FR5 | Tạo lịch hẹn, chặn trùng lịch | US5 | UC4 | SHOULD | appointment | M3 Đặt lịch hẹn |
+| FR6 | Danh sách phiếu của kỹ thuật viên | US6 | UC5 | SHOULD | ticket | M1 (cùng bố cục bảng) |
+| FR7 | Bảng khối lượng công việc | US7 | UC6 | SHOULD | ticket, technician | M1 (cùng bố cục bảng) |
+| — | Xem lịch sử phiếu riêng (W9), hủy lịch hẹn thủ công (W10), gửi SMS (W6) | — | — | WON'T | — | ngoài phạm vi |
 
-*Cột Test case là mã dự kiến, nội dung chi tiết viết ở BT3. Mỗi tiêu chí chấp nhận ở mục 3 ứng với ít nhất một test case.*
+**Đọc theo hàng:** mỗi FR mức MUST/SHOULD đủ User Story, use case, bảng dữ liệu và màn hình; chỉ hàng WON'T được trống. **Đọc theo cột "Bảng dữ liệu":** cả 6 bảng của ERD (`ticket`, `issue_category`, `technician`, `technician_skill`, `ticket_status_log`, `appointment`) đều xuất hiện ít nhất một lần, không có bảng cô lập. Mã test case dự kiến TC01–TC14 ứng với các tiêu chí chấp nhận ở mục 3, viết chi tiết ở BT3.
 
-**Thay đổi so với bản nháp Buổi 3:** giữ 8 User Story với 3 story MUST theo checklist Buổi 4 (US5 hạ xuống SHOULD, thêm US8 mức COULD); story "kỹ thuật viên cập nhật tiến độ sửa chữa" chuyển thành W4 để phạm vi chỉ còn một luồng phân công và lịch hẹn; lịch sử đổi kỹ thuật viên ghi chung vào `ticket_status_log`; gắn nhãn *(ngoại lệ)* cho các tiêu chí chấp nhận ngoại lệ; bỏ use case "Xem gợi ý kỹ thuật viên" vì là use case yếu (chỉ là bước 3 của UC2, xem xong quản lý chưa đạt mục tiêu), đánh số lại và thêm use case mạnh UC8 "Hủy lịch hẹn" (US9, FR9).
+**Thay đổi khi nộp BT1 (Buổi 6):** rút từ 9 xuống 7 User Story theo yêu cầu "5–7 User Story" của BT1 – hai story mức COULD (xem lịch sử phiếu, hủy lịch hẹn thủ công) chuyển thành W9, W10; sơ đồ còn 6 use case mạnh; bảng truy vết bổ sung cột Bảng dữ liệu và Màn hình.
+
+**Thay đổi so với bản nháp Buổi 3:** giữ 8 User Story với 3 story MUST theo checklist Buổi 4 (US5 hạ xuống SHOULD, thêm US8 mức COULD); story "kỹ thuật viên cập nhật tiến độ sửa chữa" chuyển thành W4 để phạm vi chỉ còn một luồng phân công và lịch hẹn; lịch sử đổi kỹ thuật viên ghi chung vào `ticket_status_log`; gắn nhãn *(ngoại lệ)* cho các tiêu chí chấp nhận ngoại lệ; bỏ use case "Xem gợi ý kỹ thuật viên" vì là use case yếu (chỉ là bước 3 của UC2, xem xong quản lý chưa đạt mục tiêu), đánh số lại UC1–UC6.
 
 ---
 

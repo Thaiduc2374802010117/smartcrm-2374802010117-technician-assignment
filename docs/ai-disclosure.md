@@ -7,6 +7,7 @@
 | Claude | Mục 2 – Use Case Diagram, đặc tả UC2, UC4 | "Use case phải là use case mạnh" (theo nhắc nhở của thầy trên lớp) | Đưa yêu cầu "use case mạnh" của thầy vào; đồng ý bỏ use case yếu "Xem gợi ý kỹ thuật viên" sau khi áp phép thử "làm xong actor có đạt mục tiêu không"; mở `usecase.drawio` bằng draw.io để kiểm tra file gốc |
 | Claude | Mục 3 – Kiến trúc; Mục 4 – ERD, SQL DDL | "Đọc file buổi 5 và làm 4 việc thầy giao" | Đối chiếu sơ đồ với mẫu kiến trúc 4 lớp của slide Buổi 5; kiểm 4 câu lập luận theo khuôn "Vì NFR… tôi chọn… đánh đổi là…"; soát 5 lỗi ERD và 3NF (sửa phụ thuộc bắc cầu `technician.center_id`) |
 | Claude | Mục 5 – Wireframe; rà soát nhất quán | "Đọc kĩ file buổi 6 làm cho tôi" | Chạy 6 phép kiểm nhất quán và 11 mục kiểm chứng; kiểm từng trường wireframe có cột trong ERD; kiểm 7 luồng ngoại lệ có chỗ hiển thị thông báo |
+| Claude | Sửa bài theo nhận xét BT1 (ERD 6 bảng, rút gọn PDF) | "Thầy chấm BT1 và nhận xét cần cải thiện, chỉnh lại cho đầy đủ các ý" | Đọc nhận xét của giảng viên; đồng ý phương án gộp `employee` vào `technician` theo gợi ý của thầy; kiểm lại 6 bảng, 9 khóa ngoại trong ERD và DDL; đổi đúng tên file nộp |
 
 **Phần em tự làm:**
 

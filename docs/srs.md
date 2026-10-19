@@ -1,6 +1,6 @@
 # Bản SRS rút gọn – Luồng L4: Phân công kỹ thuật viên và lịch hẹn
 
-Nguyễn Thái Đức – MSSV 2374802010117 – Track SE · Phiên bản 1.3 (nộp BT1) · Rút gọn theo tinh thần ISO/IEC/IEEE 29148 (không tuân thủ đầy đủ)
+Nguyễn Thái Đức – MSSV 2374802010117 – Track SE · Phiên bản 1.4 (sửa theo nhận xét BT1) · Rút gọn theo tinh thần ISO/IEC/IEEE 29148 (không tuân thủ đầy đủ)
 
 ## 1. Giới thiệu và phạm vi
 
@@ -113,7 +113,9 @@ Khách hàng là người hưởng lợi, không thao tác trực tiếp: quản
 | FR7 | Bảng khối lượng công việc | US7 | UC6 | SHOULD | ticket, technician | M1 (cùng bố cục bảng) |
 | — | Xem lịch sử phiếu riêng (W9), hủy lịch hẹn thủ công (W10), gửi SMS (W6) | — | — | WON'T | — | ngoài phạm vi |
 
-**Đọc theo hàng:** mỗi FR mức MUST/SHOULD đủ User Story, use case, bảng dữ liệu và màn hình; chỉ hàng WON'T được trống. **Đọc theo cột "Bảng dữ liệu":** cả 6 bảng của ERD (`ticket`, `issue_category`, `technician`, `technician_skill`, `ticket_status_log`, `appointment`) đều xuất hiện ít nhất một lần, không có bảng cô lập. Mã test case dự kiến TC01–TC14 ứng với các tiêu chí chấp nhận ở mục 3, viết chi tiết ở BT3.
+**Đọc theo hàng:** mỗi FR mức MUST/SHOULD đủ User Story, use case, bảng dữ liệu và màn hình; chỉ hàng WON'T được trống. **Đọc theo cột "Bảng dữ liệu":** cả 6 bảng của ERD (`ticket`, `issue_category`, `technician`, `technician_skill`, `ticket_status_log`, `appointment`) đều xuất hiện ít nhất một lần, không có bảng cô lập. Mã test case dự kiến TC01–TC14 ứng với các tiêu chí chấp nhận ở mục 3, viết chi tiết ở BT3. Hai test ưu tiên cho BT2 theo góp ý của giảng viên: **TC07** gửi 2 yêu cầu phân công cùng lúc cho một phiếu, kiểm tra đúng 1 thành công và đúng 1 dòng lịch sử (NFR3); **TC10** đặt lịch 09:15–09:45 khi đã có lịch 09:00–09:30, kiểm tra ràng buộc EXCLUDE từ chối (AC1 của US5).
+
+**Thay đổi theo nhận xét BT1:** gộp `employee` vào `technician` (thêm `full_name`, `center_id`), bỏ `service_center` – ERD còn đúng 6 bảng; giả lập người dùng bằng header; rút gọn PDF, các bảng soi lỗi ERD và 3NF để trong repo (`docs/thiet-ke.md`).
 
 **Thay đổi khi nộp BT1 (Buổi 6):** rút từ 9 xuống 7 User Story theo yêu cầu "5–7 User Story" của BT1 – hai story mức COULD (xem lịch sử phiếu, hủy lịch hẹn thủ công) chuyển thành W9, W10; sơ đồ còn 6 use case mạnh; bảng truy vết bổ sung cột Bảng dữ liệu và Màn hình.
 

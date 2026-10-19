@@ -6,7 +6,7 @@ File gốc: [`architecture.drawio`](architecture.drawio). Kiến trúc chọn: *
 
 | Lớp | Thành phần | Trách nhiệm | KHÔNG được làm | Trao đổi |
 |---|---|---|---|---|
-| ① Trình bày | Giao diện web (View) · FastAPI routers (Controller) | Hiển thị 3 màn hình; nhận request theo API contract E1–E8; kiểm tra kiểu dữ liệu; kiểm tra quyền dùng chung (vai trò + trung tâm); đổi lỗi nghiệp vụ thành mã HTTP | Chứa quy tắc nghiệp vụ; truy vấn CSDL trực tiếp | Giao diện → API: HTTP + JSON (REST). API → Service: gọi hàm Python |
+| ① Trình bày | Giao diện web (View) · FastAPI routers (Controller) | Hiển thị 3 màn hình; nhận request theo API contract E1–E8; kiểm tra kiểu dữ liệu; kiểm tra quyền dùng chung (vai trò + trung tâm, đọc từ header giả lập); đổi lỗi nghiệp vụ thành mã HTTP | Chứa quy tắc nghiệp vụ; truy vấn CSDL trực tiếp | Giao diện → API: HTTP + JSON (REST). API → Service: gọi hàm Python |
 | ② Nghiệp vụ | AssignmentService · AppointmentService · TicketQueryService | Chứa **toàn bộ** quy tắc: QT-06, QT-07, QT-08, QT-L4-01 … QT-L4-05 | Biết dữ liệu lưu bằng công nghệ gì; biết về HTTP | Gọi qua giao diện Repository |
 | ③ Truy cập dữ liệu | TicketRepository · TechnicianRepository · AppointmentRepository · StatusLogRepository | Câu SQL tham số hóa; mở/đóng giao dịch; UPDATE có điều kiện | Chứa quy tắc nghiệp vụ; gọi ngược lên Service | SQL qua TCP cổng 5432 |
 | ④ Lưu trữ | PostgreSQL 16 | Lưu 6 bảng; bảo đảm toàn vẹn bằng khóa ngoại, NOT NULL, CHECK, EXCLUDE; index | — | Chỉ nhận kết nối từ lớp ③ |
@@ -18,7 +18,7 @@ File gốc: [`architecture.drawio`](architecture.drawio). Kiến trúc chọn: *
 **Lập luận lựa chọn kiến trúc** (khuôn: *Vì NFR… yêu cầu…, tôi chọn…, đánh đổi là…*)
 
 1. Vì **NFR3** yêu cầu phân công và ghi lịch sử phiếu cùng thành công hoặc cùng không xảy ra, và khi có 2 yêu cầu đồng thời thì **đúng 1** thành công, tôi chọn **một cơ sở dữ liệu quan hệ PostgreSQL duy nhất, giao dịch do lớp Truy cập dữ liệu quản lý, và câu `UPDATE ... WHERE status = 'MOI'` có điều kiện**, đánh đổi là mọi chức năng dùng chung một CSDL nên không tách triển khai riêng được, và tôi phải tự viết SQL thay vì dùng ORM cho nhanh.
-2. Vì **NFR4** yêu cầu **100%** chức năng kiểm tra vai trò và trung tâm, tôi chọn **đặt việc kiểm tra quyền ở một thành phần dùng chung của lớp trình bày (API), chạy trước mọi endpoint**, thay vì để từng hàm tự kiểm tra, đánh đổi là mỗi request tốn thêm một truy vấn tra bảng `employee` và lớp trình bày phụ thuộc vào bảng này.
+2. Vì **NFR4** yêu cầu **100%** chức năng kiểm tra vai trò và trung tâm, tôi chọn **đặt việc kiểm tra quyền ở một thành phần dùng chung của lớp trình bày (API), chạy trước mọi endpoint**, đọc vai trò và trung tâm từ thông tin người dùng giả lập (header `X-Employee-Id`, `X-Role`, `X-Center-Id`) thay vì để từng hàm tự kiểm tra, đánh đổi là prototype chưa có đăng nhập thật (W8) nên thông tin người dùng có thể bị giả mạo; khi có đăng nhập chỉ cần thay nguồn đọc tại đúng một chỗ.
 3. Vì **NFR1** và **NFR2** yêu cầu danh sách phiếu **dưới 2 giây** và gợi ý **dưới 1 giây** với **10.000 phiếu**, tôi chọn **để CSDL lọc, đếm, sắp xếp và phân trang bằng truy vấn có index `(center_id, status, due_date)` và `(technician_id, status)`**, thay vì tải toàn bộ phiếu lên lớp Nghiệp vụ rồi xử lý bằng Python, đánh đổi là một phần quy tắc gợi ý QT-08 nằm trong câu SQL nên khó kiểm thử đơn vị hơn, và mỗi index làm thao tác ghi chậm thêm một chút – chấp nhận được vì đọc nhiều hơn ghi.
 4. Vì **NFR1** yêu cầu **dưới 2 giây trên máy 8 GB RAM** và dự án chỉ có một người làm trong 6 buổi, tôi chọn **kiến trúc phân lớp chạy một tiến trình** thay vì tách microservices, đánh đổi là khi các luồng khác (L2, L5) nhập vào sẽ dùng chung một mã nguồn và không mở rộng từng phần độc lập được.
 
@@ -28,62 +28,50 @@ File gốc: [`architecture.drawio`](architecture.drawio). Kiến trúc chọn: *
 
 File gốc: [`schema.dbml`](schema.dbml) (dbdiagram.io) · SQL DDL: [`schema.sql`](schema.sql) (đã kiểm tra cú pháp bằng bộ phân tích cú pháp PostgreSQL).
 
-**Bốn bước đi từ SRS tới mô hình dữ liệu**
+**Kiểm chứng track SE:** **6 bảng** (đúng khoảng 4–6) ✔ · mỗi bảng có khóa chính ✔ · **9 khóa ngoại** ✔ · không bảng cô lập ✔ · có SQL DDL skeleton ✔ · có index gắn NFR1, NFR2 ✔.
 
-| Bước | Kết quả áp dụng cho L4 |
-|---|---|
-| 1. Gạch chân DANH TỪ → thực thể | phiếu bảo hành → `ticket` · kỹ thuật viên → `technician` · tay nghề → `technician_skill` · nhóm sự cố → `issue_category` · lịch hẹn → `appointment` · lịch sử phiếu → `ticket_status_log` |
-| 2. Hỏi "cần biết gì?" → thuộc tính | Lấy từ mục 5 SRS (quy tắc) và wireframe: `priority`, `status`, `due_date`, `proficiency`, `start_at`, `end_at`, `note`… |
-| 3. Đọc ĐỘNG TỪ → quan hệ | quản lý **GÁN** phiếu cho kỹ thuật viên (1:N, `ticket.technician_id` cho phép NULL) · kỹ thuật viên **CÓ** tay nghề ở nhiều nhóm sự cố (N:M → bảng trung gian `technician_skill`) · phiếu **CÓ** nhiều lịch hẹn (1:N) · hệ thống **LƯU** lịch sử phiếu (1:N) |
-| 4. Truy vết ngược bảng → FR | Bảng dưới đây: bảng nào cũng phục vụ ít nhất một FR, FR nào cũng có bảng đỡ |
+**Truy vết ngược bảng → yêu cầu chức năng**
 
 | Bảng | Vai trò | Khóa chính | Khóa ngoại | Phục vụ FR |
 |---|---|---|---|---|
 | `issue_category` | Nhóm sự cố, để khớp tay nghề | `category_id` | — (được tham chiếu) | FR1, FR2 |
-| `technician` | Kỹ thuật viên, bậc | `technician_id` | `employee_id` | FR2, FR3, FR4, FR6, FR7 |
+| `technician` | Kỹ thuật viên: họ tên, trung tâm, bậc | `technician_id` | — (được tham chiếu) | FR2, FR3, FR4, FR6, FR7 |
 | `technician_skill` | Tay nghề 1–5 theo nhóm sự cố (QT-08) | `(technician_id, category_id)` | `technician_id`, `category_id` | FR2 |
-| `ticket` | Phiếu bảo hành, trạng thái, kỹ thuật viên đang giữ | `ticket_id` | `center_id`, `category_id`, `technician_id` | FR1, FR3, FR4, FR6, FR7 |
-| `appointment` | Lịch hẹn giao – nhận máy | `appointment_id` | `ticket_id`, `technician_id`, `created_by` | FR5 |
-| `ticket_status_log` | Lịch sử phiếu: chuyển trạng thái, đổi kỹ thuật viên | `log_id` | `ticket_id`, `from_technician_id`, `to_technician_id`, `changed_by` | FR3, FR4 |
+| `ticket` | Phiếu bảo hành, trạng thái, kỹ thuật viên đang giữ | `ticket_id` | `category_id`, `technician_id` | FR1, FR3, FR4, FR6, FR7 |
+| `appointment` | Lịch hẹn giao – nhận máy | `appointment_id` | `ticket_id`, `technician_id` | FR5 |
+| `ticket_status_log` | Lịch sử phiếu: chuyển trạng thái, đổi kỹ thuật viên | `log_id` | `ticket_id`, `from_technician_id`, `to_technician_id` | FR3, FR4 |
 
-**Kiểm chứng track SE:** 6 bảng chính ✔ · mỗi bảng có khóa chính ✔ · 14 quan hệ khóa ngoại ✔ · không bảng cô lập ✔ · có SQL DDL skeleton ✔. Hai bảng phụ trợ tối thiểu `service_center`, `employee` được case study cho phép tự thiết kế (Mục 8), chỉ giữ cột cần cho L4.
+`center_id` (ở `technician`, `ticket`), `created_by`, `changed_by` là **cột mã**, không có khóa ngoại: danh mục trung tâm và nhân viên quản lý thuộc hệ thống dùng chung của Mekong Mobile, nằm ngoài phạm vi L4 (theo nhận xét BT1, em bỏ hai bảng phụ trợ `service_center`, `employee` để giữ đúng 4–6 bảng).
+
+**Index gắn với yêu cầu phi chức năng:** `ticket (center_id, status, due_date)` – E1 danh sách phiếu MOI (NFR1) · `ticket (technician_id, status)` – đếm phiếu đang mở (NFR1, NFR2) · `technician (center_id)` và `technician_skill (category_id, proficiency)` – lọc kỹ thuật viên cùng trung tâm, tay nghề ≥ 3 (NFR2) · `ticket_status_log (ticket_id, changed_at)` – kiểm chứng NFR3 · ràng buộc `EXCLUDE` trên `appointment` chống trùng lịch (QT-L4-02).
 
 **Soi năm lỗi mô hình dữ liệu (Buổi 5)**
 
 | Lỗi | Kết quả kiểm tra |
 |---|---|
-| 1. Bảng cô lập | ✔ Không có: cả 8 bảng đều nối với ít nhất một bảng khác bằng khóa ngoại |
+| 1. Bảng cô lập | ✔ Không có: cả 6 bảng đều nối với ít nhất một bảng khác bằng khóa ngoại |
 | 2. Thiếu bảng lịch sử | ✔ Có `ticket_status_log` ghi mỗi lần chuyển trạng thái và đổi kỹ thuật viên, kèm thời điểm, người thực hiện |
 | 3. Lưu giá trị tính được | ✔ Không lưu "số phiếu đang mở", "sắp quá hạn": tính khi truy vấn từ `ticket.status`, `due_date` |
-| 4. Không có index | ✔ 5 index gắn với NFR1, NFR2 (bảng index bên dưới, ghi cả trên ERD) |
-| 5. Khóa nghiệp vụ làm khóa chính | ✔ Dùng khóa nhân tạo `ticket_id`; mã phiếu `ticket_code` chỉ đặt UNIQUE; `category_name` cũng chỉ UNIQUE |
+| 4. Không có index | ✔ 5 index và 1 ràng buộc EXCLUDE gắn với NFR1, NFR2, NFR3 |
+| 5. Khóa nghiệp vụ làm khóa chính | ✔ Dùng khóa nhân tạo `ticket_id`; mã phiếu `ticket_code` chỉ đặt UNIQUE |
 
 **Kiểm tra chuẩn hóa 3NF** – câu hỏi nhanh: *"biết khóa chính thì có biết ngay giá trị cột này không, mà không cần đi qua cột khác?"*
 
 | Dạng chuẩn | Kiểm tra | Kết quả |
 |---|---|---|
-| 1NF | Mỗi ô một giá trị, không nhóm lặp | ✔ Tay nghề theo nhiều nhóm sự cố tách thành bảng `technician_skill`, không lưu chuỗi "MAN_HINH, PIN" |
-| 2NF | Bảng khóa ghép `technician_skill (technician_id, category_id)`: cột không khóa phụ thuộc toàn bộ khóa | ✔ `proficiency` phụ thuộc cả kỹ thuật viên lẫn nhóm sự cố |
-| 3NF | Không phụ thuộc bắc cầu | ✔ **Đã sửa:** bản nháp có cả `technician.center_id` và `employee.center_id` (trung tâm phụ thuộc bắc cầu qua `employee_id`) → bỏ `technician.center_id`, lấy trung tâm qua phép nối với `employee`. `ticket` không lưu tên kỹ thuật viên hay tên nhóm sự cố, chỉ lưu khóa ngoại |
+| 1NF | Mỗi ô một giá trị, không nhóm lặp | ✔ Tay nghề theo nhiều nhóm sự cố tách thành bảng `technician_skill` |
+| 2NF | Bảng khóa ghép `technician_skill`: cột không khóa phụ thuộc toàn bộ khóa | ✔ `proficiency` phụ thuộc cả kỹ thuật viên lẫn nhóm sự cố |
+| 3NF | Không phụ thuộc bắc cầu | ✔ `technician` lưu trực tiếp `full_name`, `center_id` (đã gộp từ `employee`); `ticket` không lưu tên kỹ thuật viên hay tên nhóm sự cố, chỉ lưu khóa ngoại |
 
-`appointment.technician_id` **không** phải dư thừa: nó ghi kỹ thuật viên **tại thời điểm hẹn** (không đổi khi phiếu đổi người – QT-L4-05 hủy lịch cũ) và cần cho ràng buộc EXCLUDE chống trùng lịch.
-
-**Index gắn với yêu cầu phi chức năng**
-
-| Index | Phục vụ | NFR |
-|---|---|---|
-| `ticket (center_id, status, due_date)` | E1 – danh sách phiếu MOI sắp theo hạn cam kết | NFR1 |
-| `ticket (technician_id, status)` | E2, E7, E8 – đếm phiếu đang mở của kỹ thuật viên | NFR1, NFR2 |
-| `technician_skill (category_id, proficiency)` | E2 – lọc kỹ thuật viên tay nghề ≥ 3 | NFR2 |
-| `appointment (technician_id, start_at)` + EXCLUDE | E4, E5 – lịch hẹn và chống trùng (QT-L4-02) | NFR3 |
-| `ticket_status_log (ticket_id, changed_at)` | E6 – đọc dòng lịch sử gần nhất khi đổi kỹ thuật viên; kiểm chứng NFR3 (đúng 1 dòng lịch sử) | NFR3 |
+`appointment.technician_id` **không** dư thừa: nó ghi kỹ thuật viên **tại thời điểm hẹn** và cần cho ràng buộc EXCLUDE chống trùng lịch.
 
 **Điều chỉnh so với từ điển dữ liệu tham chiếu (Mục 8 case study), có lý do:**
+
+- `technician` thêm `full_name` (thay cho bảng `employee` theo nhận xét BT1); `center_id` là cột mã.
 - `ticket_status_log` thêm `from_technician_id`, `to_technician_id` để ghi việc đổi kỹ thuật viên kèm lý do (QT-07) mà không cần thêm bảng thứ 7.
-- `technician` bỏ `center_id` để đạt 3NF (trung tâm lấy qua `employee`).
-- `ticket` lược bỏ `customer_id`, `device_id`, `is_warranty` (thuộc L2, L4 không dùng); thêm `is_deleted` cho QT-13.
-- `appointment` do em thiết kế (case study chỉ nêu tên): `EXCLUDE` chặn trùng lịch ở mức CSDL (QT-L4-02), `CHECK` độ dài 15–120 phút (QT-L4-03).
-- Dùng `TIMESTAMPTZ` thay `TIMESTAMP` để lưu múi giờ +07:00 đúng quy ước ISO 8601 của API contract.
+- `ticket` lược bỏ `customer_id`, `device_id`, `is_warranty` (thuộc L2); thêm `is_deleted` cho QT-13.
+- `appointment` do em thiết kế: `EXCLUDE` chặn trùng lịch ở mức CSDL (QT-L4-02), `CHECK` độ dài 15–120 phút (QT-L4-03).
+- Dùng `TIMESTAMPTZ` để lưu múi giờ +07:00 đúng quy ước ISO 8601 của API contract.
 
 # Wireframe 3 màn hình
 
@@ -94,7 +82,7 @@ File gốc: [`schema.dbml`](schema.dbml) (dbdiagram.io) · SQL DDL: [`schema.sql
 | Màn hình | Dạng | Use case | Trường hiển thị → cột trong ERD |
 |---|---|---|---|
 | M1 Danh sách phiếu chờ phân công | Danh sách | UC1 (UC5, UC6 dùng lại bố cục) | Mã phiếu `ticket.ticket_code` · Nhóm sự cố `issue_category.category_name` · Mức ưu tiên `ticket.priority` · Thời điểm tiếp nhận `ticket.received_at` · Hạn cam kết `ticket.due_date` · Cảnh báo (tính từ `due_date`, không lưu) |
-| M2 Phân công kỹ thuật viên | Chi tiết + sửa | UC2, UC3 | Trạng thái phiếu `ticket.status` · Mô tả lỗi `ticket.issue_desc` · Kỹ thuật viên `employee.full_name` · Bậc `technician.level` · Tay nghề `technician_skill.proficiency` · Số phiếu đang mở (đếm `ticket`) · Lý do đổi `ticket_status_log.note` |
+| M2 Phân công kỹ thuật viên | Chi tiết + sửa | UC2, UC3 | Trạng thái phiếu `ticket.status` · Mô tả lỗi `ticket.issue_desc` · Kỹ thuật viên `technician.full_name` · Bậc `technician.level` · Tay nghề `technician_skill.proficiency` · Số phiếu đang mở (đếm `ticket`) · Lý do đổi `ticket_status_log.note` |
 | M3 Đặt lịch hẹn giao – nhận máy | Tạo mới | UC4 | Loại lịch hẹn `appointment.appointment_type` · Bắt đầu `appointment.start_at` · Kết thúc `appointment.end_at` · Ghi chú `appointment.note` · Kỹ thuật viên lấy từ `ticket.technician_id` |
 
 **Kiểm hai chiều:** mọi trường trên màn hình có cột tương ứng; ngược lại mọi cột NOT NULL được nhập trên màn hình hoặc do hệ thống tự sinh (`ticket_status_log.changed_at`, `changed_by`, `appointment.status`, `created_by`). Cả 6 bảng chính đều xuất hiện ở ít nhất một màn hình.
@@ -128,8 +116,8 @@ File gốc: [`schema.dbml`](schema.dbml) (dbdiagram.io) · SQL DDL: [`schema.sql
 | Khối lượng công việc / phiếu đang mở | UC6 | TicketQueryService | đếm `ticket` theo `status` | "Số phiếu đang mở" | `open_ticket_count` |
 | Lịch hẹn | UC4 | AppointmentService, AppointmentRepository | `appointment` | "Lịch hẹn mới", "Loại lịch hẹn" | `appointment_id`, `appointment_type` |
 | Lịch sử phiếu | điều kiện sau UC2, UC3 | StatusLogRepository | `ticket_status_log` | "Lý do đổi kỹ thuật viên" (ghi vào lịch sử phiếu) | `status_log` |
-| Quản lý trung tâm | actor "Quản lý trung tâm" | kiểm tra quyền (vai trò) | `employee.role = QUAN_LY` | "Quản lý trung tâm: Nguyễn Thị Trâm" | header `X-Employee-Id` |
-| Trung tâm bảo hành | "trung tâm mình" (QT-14) | kiểm tra quyền (trung tâm) | `service_center` | "Trung tâm bảo hành Tân Bình" | `center_name` |
+| Quản lý trung tâm | actor "Quản lý trung tâm" | kiểm tra quyền (vai trò) | header giả lập `X-Role = QUAN_LY` (W8) | "Quản lý trung tâm: Nguyễn Thị Trâm" | header `X-Role` |
+| Trung tâm bảo hành | "trung tâm mình" (QT-14) | kiểm tra quyền (trung tâm) | cột `center_id` | "Trung tâm bảo hành Tân Bình" | `center_id`, `center_name` |
 
 **Kết quả:** 13/13 thuật ngữ dùng **một tên duy nhất** trên cả 6 tài liệu.
 
@@ -156,6 +144,6 @@ File gốc: [`schema.dbml`](schema.dbml) (dbdiagram.io) · SQL DDL: [`schema.sql
 | 6 | Đặc tả use case quan trọng nhất: luồng chính + ≥ 1 ngoại lệ | ✔ | UC2 (4 ngoại lệ), UC4 (3 ngoại lệ) |
 | 7 | Sơ đồ kiến trúc có chú thích, ghi cách các lớp trao đổi | ✔ | Nhãn HTTP+JSON, gọi hàm, Repository, SQL |
 | 8 | ≥ 3 câu lập luận gắn NFR, có đánh đổi | ✔ | 4 câu |
-| 9 | ERD 4–6 bảng, ≥ 2 khóa ngoại, không bảng cô lập [SE] | ✔ | 6 bảng, 14 khóa ngoại, SQL DDL |
+| 9 | ERD 4–6 bảng, ≥ 2 khóa ngoại, không bảng cô lập [SE] | ✔ | 6 bảng, 9 khóa ngoại, SQL DDL |
 | 10 | Wireframe 3 màn hình, trường dữ liệu đối chiếu được với ERD | ✔ | M1, M2, M3 + bảng đối chiếu |
 | 11 | Thuật ngữ nhất quán; có bảng khai báo AI | ✔ | Bảng trên + Phụ lục |

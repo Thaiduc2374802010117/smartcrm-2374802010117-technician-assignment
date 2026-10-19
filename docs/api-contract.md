@@ -288,14 +288,14 @@ Lịch hẹn tự gắn với kỹ thuật viên **đang giữ phiếu** (QT-L4-
 
 ## 6. Xác thực và phân quyền
 
-Phiên bản hiện tại **giả lập** người dùng (W8 trong SRS): mỗi request gửi header `X-Employee-Id` với mã nhân viên có trong bảng `employee`. Hệ thống tra vai trò và trung tâm từ mã này; không tin vai trò do client gửi lên.
+Phiên bản hiện tại **giả lập** người dùng (W8 trong SRS): mỗi request gửi 3 header `X-Employee-Id` (mã nhân viên; với kỹ thuật viên là `technician_id`), `X-Role` (`QUAN_LY` hoặc `KY_THUAT_VIEN`) và `X-Center-Id`. Thành phần kiểm tra quyền dùng chung đọc 3 header này trước mọi endpoint; khi có đăng nhập thật chỉ cần thay nguồn đọc tại một chỗ.
 
 | Endpoint | Quản lý trung tâm | Kỹ thuật viên |
 |---|---|---|
 | E1, E2, E3, E4, E5, E6, E8 | ✅ trong trung tâm mình | ❌ 403 |
 | E7 | ❌ 403 | ✅ phiếu của chính mình |
 
-Thiếu header hoặc mã không tồn tại → **401**. Đúng vai trò nhưng khác trung tâm → **403** (QT-14).
+Thiếu header hoặc giá trị không hợp lệ → **401**. Đúng vai trò nhưng khác trung tâm → **403** (QT-14).
 
 ---
 

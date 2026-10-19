@@ -34,7 +34,7 @@ Người dùng: Quản lý trung tâm bảo hành, Kỹ thuật viên.
 | `docs/srs.md` | Mục 1 – SRS rút gọn 6 mục, đặc tả UC2, UC4 | Xem trực tiếp trên GitHub |
 | `docs/usecase.drawio` | Mục 2 – Use Case Diagram (file gốc) | app.diagrams.net → Tệp → Mở từ → Thiết bị |
 | `docs/architecture.drawio` | Mục 3 – Sơ đồ kiến trúc 4 lớp (file gốc) | app.diagrams.net → Tệp → Mở từ → Thiết bị |
-| `docs/schema.dbml`, `docs/schema.sql` | Mục 4 – ERD (dbdiagram.io) và SQL DDL | dbdiagram.io (dán nội dung) / psql |
+| `docs/schema.dbml`, `docs/schema.sql` | Mục 4 – ERD 6 bảng (dbdiagram.io) và SQL DDL | dbdiagram.io (dán nội dung) / psql |
 | `docs/wireframe.png` | Mục 5 – Wireframe 3 màn hình | Xem trực tiếp |
 | `docs/thiet-ke.md` | Lập luận kiến trúc, 5 lỗi ERD, 3NF, đối chiếu wireframe, rà soát nhất quán | Xem trực tiếp trên GitHub |
 | `docs/api-contract.md` | Hợp đồng API (mẫu track SE) | Xem trực tiếp trên GitHub |

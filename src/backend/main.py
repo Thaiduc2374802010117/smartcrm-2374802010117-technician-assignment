@@ -1,33 +1,28 @@
+"""Khởi động ứng dụng FastAPI – luồng L4 Phân công kỹ thuật viên và lịch hẹn.
+Chạy (từ thư mục gốc repo):  uvicorn src.backend.main:app --reload --port 3000"""
 import os
-from pathlib import Path
 
-import psycopg
-from dotenv import load_dotenv
 from fastapi import FastAPI
 
-# Đọc file .env ở thư mục gốc repo
-load_dotenv(Path(__file__).resolve().parents[2] / ".env")
+from . import db
+from .api import errors
+from .api.tickets import router as tickets_router
 
-app = FastAPI(title="Smart CRM - L4 Phan cong ky thuat vien")
+app = FastAPI(title="Smart CRM – L4 Phân công kỹ thuật viên và lịch hẹn", version="0.2.0")
+errors.register(app)
+app.include_router(tickets_router)
 
 
-@app.get("/")
+@app.get("/", include_in_schema=False)
 def hello():
     return "Hello Smart CRM"
 
 
-@app.get("/db-check")
+@app.get("/db-check", summary="Kiểm tra kết nối CSDL (smoke test buổi 2)")
 def db_check():
     try:
-        with psycopg.connect(
-            host=os.getenv("DB_HOST"),
-            port=os.getenv("DB_PORT"),
-            dbname=os.getenv("DB_NAME"),
-            user=os.getenv("DB_USER"),
-            password=os.getenv("DB_PASSWORD"),
-            connect_timeout=3,
-        ) as conn:
-            server_time = conn.execute("SELECT NOW()").fetchone()[0]
-        return {"status": "OK", "database": os.getenv("DB_NAME"), "server_time": str(server_time)}
-    except Exception as e:
+        with db.connect() as conn:
+            row = conn.execute("SELECT now() AS server_time").fetchone()
+        return {"status": "OK", "database": os.getenv("DB_NAME"), "server_time": str(row["server_time"])}
+    except Exception as e:  # noqa: BLE001 – smoke test cần báo mọi lỗi kết nối
         return {"status": "ERROR", "message": str(e)}

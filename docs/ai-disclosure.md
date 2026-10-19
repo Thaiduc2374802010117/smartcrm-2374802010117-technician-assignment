@@ -8,6 +8,7 @@
 | Claude | Mục 3 – Kiến trúc; Mục 4 – ERD, SQL DDL | "Đọc file buổi 5 và làm 4 việc thầy giao" | Đối chiếu sơ đồ với mẫu kiến trúc 4 lớp của slide Buổi 5; kiểm 4 câu lập luận theo khuôn "Vì NFR… tôi chọn… đánh đổi là…"; soát 5 lỗi ERD và 3NF (sửa phụ thuộc bắc cầu `technician.center_id`) |
 | Claude | Mục 5 – Wireframe; rà soát nhất quán | "Đọc kĩ file buổi 6 làm cho tôi" | Chạy 6 phép kiểm nhất quán và 11 mục kiểm chứng; kiểm từng trường wireframe có cột trong ERD; kiểm 7 luồng ngoại lệ có chỗ hiển thị thông báo |
 | Claude | Sửa bài theo nhận xét BT1 (ERD 6 bảng, rút gọn PDF) | "Thầy chấm BT1 và nhận xét cần cải thiện, chỉnh lại cho đầy đủ các ý" | Đọc nhận xét của giảng viên; đồng ý phương án gộp `employee` vào `technician` theo gợi ý của thầy; kiểm lại 6 bảng, 9 khóa ngoại trong ERD và DDL; đổi đúng tên file nộp |
+| Claude | Buổi 8: nhật ký thay đổi thiết kế, khung `src/backend/` 4 lớp, migration, module Phân công (E1, E3), unit test | "Làm tiếp buổi 8, chỉ module đầu tiên chạy được, cài môi trường, đúng kiến trúc đã nộp" | Tự chạy migration và server trên máy, gọi thử E1, E3 và chụp ảnh kết quả; kiểm tra mã lỗi khớp API contract; chạy `pytest` |
 
 **Phần em tự làm:**
 

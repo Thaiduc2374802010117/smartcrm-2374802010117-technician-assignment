@@ -1,0 +1,15 @@
+<!DOCTYPE html>
+<html lang="vi"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>M3 · Đặt lịch hẹn</title><link rel="stylesheet" href="../css/style.css"></head>
+<body><div class="topbar"></div><main>
+<p><a href="tickets.html">← Quay lại danh sách</a></p>
+<h1>Đặt lịch hẹn giao – nhận máy <span class="muted" id="code"></span></h1>
+<div class="grid2"><div class="card"><h2 style="margin-top:0">Lịch hẹn sắp tới của kỹ thuật viên <span id="tname"></span></h2><div id="schedule"></div></div>
+<div class="card"><h2 style="margin-top:0">Lịch hẹn mới</h2>
+<form id="form"><div class="form-row"><label>Loại lịch hẹn<select name="type"><option value="TRA_MAY">TRA_MAY</option><option value="GIAO_MAY">GIAO_MAY</option></select></label></div>
+<div class="form-row"><label>Ngày<input type="date" name="date" required></label><label>Bắt đầu<input type="time" name="start" value="09:00" required></label>
+<label>Kết thúc<input type="time" name="end" value="09:30" required></label></div>
+<div class="form-row"><label style="flex:1">Ghi chú<input name="note" maxlength="255" placeholder="Ví dụ: khách lấy máy trước giờ trưa"></label></div>
+<button class="btn primary" type="submit">Lưu lịch hẹn</button> <a class="btn" href="tickets.html">Hủy</a></form>
+<div id="notice" hidden></div></div></div></main>
+<script type="module" src="appointment.js"></script></body></html>

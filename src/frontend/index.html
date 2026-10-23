@@ -1,0 +1,20 @@
+<!DOCTYPE html>
+<html lang="vi"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Đăng nhập · Smart CRM L4</title><link rel="stylesheet" href="css/style.css"></head>
+<body><div class="topbar"><span>Smart CRM · Phân công kỹ thuật viên và lịch hẹn</span></div>
+<main style="max-width:460px"><div class="card"><h1>Đăng nhập</h1>
+<p class="muted">Prototype giả lập người dùng (W8 – chưa có đăng nhập thật). Nhập mã nhân viên và mã trung tâm của quản lý.</p>
+<form id="login"><div class="form-row"><label style="flex:1">Họ tên<input name="full_name" value="Nguyễn Thị Trâm" required></label></div>
+<div class="form-row"><label style="flex:1">Mã nhân viên<input name="employee_id" type="number" min="1" value="3" required></label>
+<label style="flex:1">Mã trung tâm<input name="center_id" type="number" min="1" value="2" required></label></div>
+<div class="form-row"><label style="flex:1">Vai trò<select name="role"><option value="QUAN_LY">Quản lý trung tâm</option></select></label></div>
+<button class="btn primary" type="submit">Đăng nhập</button></form></div></main>
+<script type="module">
+import { saveUser } from './api/client.js';
+document.getElementById('login').addEventListener('submit', (ev) => {
+  ev.preventDefault();
+  const f = new FormData(ev.target);
+  saveUser({ full_name: f.get('full_name'), employee_id: Number(f.get('employee_id')), center_id: Number(f.get('center_id')), role: f.get('role') });
+  window.location.href = 'pages/tickets.html';
+});
+</script></body></html>

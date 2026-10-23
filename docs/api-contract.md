@@ -73,7 +73,7 @@ Trung tâm **lấy theo người dùng**, không nhận từ query, để bảo 
 **Response 200 OK**
 ```json
 {
-  "center_id": 4, "center_name": "Trung tâm bảo hành Quận Tân Bình",
+  "center_id": 2, "center_name": "Trung tâm bảo hành Quận Tân Bình",
   "page": 1, "size": 20, "total": 2,
   "items": [
     {
@@ -104,6 +104,8 @@ Trung tâm **lấy theo người dùng**, không nhận từ query, để bảo 
 
 ### E2. GET /api/tickets/{ticket_id}/technician-suggestions – Gợi ý kỹ thuật viên · US2 · FR2
 
+Trường `ticket` (bổ sung ở buổi 10 – TD-07): thông tin phiếu để màn hình M2 hiển thị, không cần thêm endpoint chi tiết phiếu.
+
 Quy tắc (QT-08): `is_active = true`, cùng `center_id` với phiếu, `proficiency ≥ 3` ở `category_id` của phiếu. Sắp theo `open_ticket_count` tăng dần, rồi `proficiency` giảm dần. Tối đa 3 người.
 
 **Response 200 OK**
@@ -111,6 +113,8 @@ Quy tắc (QT-08): `is_active = true`, cùng `center_id` với phiếu, `profici
 {
   "ticket_id": 88231,
   "category_name": "MAN_HINH",
+  "ticket": { "ticket_code": "BH000231/2026", "category_name": "MAN_HINH", "priority": "CAO", "status": "MOI",
+              "technician_id": null, "issue_desc": "Màn hình sọc xanh sau khi rơi", "due_date": "2026-10-10T08:00:00+07:00" },
   "suggestions": [
     { "technician_id": 12, "full_name": "Trần Văn B", "level": "CAO_CAP",  "proficiency": 5, "open_ticket_count": 2 },
     { "technician_id": 7,  "full_name": "Lê Thị A",   "level": "TRUNG_CAP","proficiency": 4, "open_ticket_count": 2 },
@@ -179,8 +183,9 @@ Ghi chú hiện thực: kiểm tra trạng thái và cập nhật trong **cùng 
 ```json
 {
   "technician_id": 12,
+  "full_name": "Trần Văn B",
   "items": [
-    { "appointment_id": 301, "ticket_id": 88100, "appointment_type": "TRA_MAY",
+    { "appointment_id": 301, "ticket_id": 88100, "ticket_code": "BH000100/2026", "appointment_type": "TRA_MAY",
       "start_at": "2026-10-10T09:00:00+07:00", "end_at": "2026-10-10T09:30:00+07:00", "status": "DA_HEN" }
   ]
 }

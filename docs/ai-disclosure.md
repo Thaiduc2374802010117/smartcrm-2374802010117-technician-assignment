@@ -9,6 +9,7 @@
 | Claude | Mục 5 – Wireframe; rà soát nhất quán | "Đọc kĩ file buổi 6 làm cho tôi" | Chạy 6 phép kiểm nhất quán và 11 mục kiểm chứng; kiểm từng trường wireframe có cột trong ERD; kiểm 7 luồng ngoại lệ có chỗ hiển thị thông báo |
 | Claude | Sửa bài theo nhận xét BT1 (ERD 6 bảng, rút gọn PDF) | "Thầy chấm BT1 và nhận xét cần cải thiện, chỉnh lại cho đầy đủ các ý" | Đọc nhận xét của giảng viên; đồng ý phương án gộp `employee` vào `technician` theo gợi ý của thầy; kiểm lại 6 bảng, 9 khóa ngoại trong ERD và DDL; đổi đúng tên file nộp |
 | Claude | Buổi 8: nhật ký thay đổi thiết kế, khung `src/backend/` 4 lớp, migration, module Phân công (E1, E3), unit test | "Làm tiếp buổi 8, chỉ module đầu tiên chạy được, cài môi trường, đúng kiến trúc đã nộp" | Tự chạy migration và server trên máy, gọi thử E1, E3 và chụp ảnh kết quả; kiểm tra mã lỗi khớp API contract; chạy `pytest` |
+| Claude | Buổi 10: module Lịch hẹn (E4, E5), gợi ý kỹ thuật viên (E2), giao diện 3 màn hình, bộ nạp dataset, unit test và test tích hợp | "Đọc kĩ nội dung chi tiết file buổi 10 và làm cho tôi" | Tự chạy luồng chính trên máy (đăng nhập → M1 → M2 → M3), tắt backend để kiểm tra trạng thái lỗi, chụp ảnh kết quả; chạy `pytest`; nạp dataset thật và báo lại kết quả |
 
 **Phần em tự làm:**
 

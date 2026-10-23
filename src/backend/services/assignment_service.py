@@ -43,3 +43,26 @@ class AssignmentService:
                 raise InvalidState("Phiếu vừa được phân công bởi người khác", fields={"current_status": "DA_PHAN_CONG"})
             log = uow.logs.add(ticket_id, "MOI", "DA_PHAN_CONG", None, technician_id, user.employee_id)   # QT-06
         return {**dict(updated), "assigned_at": log["changed_at"], "status_log": dict(log)}
+
+
+class SuggestionService:
+    """Gợi ý tối đa 3 kỹ thuật viên cho một phiếu (US2, FR2, E2 – bước 3 của UC2)."""
+
+    def __init__(self, uow_factory):
+        self.uow_factory = uow_factory
+
+    def suggest(self, ticket_id: int, user):
+        with self.uow_factory() as uow:
+            ticket = uow.tickets.get_detail(ticket_id)
+            if ticket is None:
+                raise NotFound("Không tìm thấy phiếu", fields={"ticket_id": str(ticket_id)})
+            if ticket["center_id"] != user.center_id:                       # QT-14
+                raise Forbidden("Không có quyền với phiếu của trung tâm khác")
+            if ticket["category_id"] is None:
+                raise RuleViolation("Phiếu chưa có nhóm sự cố nên không gợi ý được", code="CATEGORY_REQUIRED")
+            rows = uow.technicians.suggest(ticket["center_id"], ticket["category_id"], MIN_PROFICIENCY)   # QT-08
+        result = {"ticket_id": ticket_id, "category_name": ticket["category_name"], "ticket": dict(ticket),
+                  "suggestions": [dict(r) for r in rows]}
+        if not rows:                                                       # UC2 ngoại lệ 3a
+            result["message"] = "Không có kỹ thuật viên đủ tay nghề tại trung tâm"
+        return result

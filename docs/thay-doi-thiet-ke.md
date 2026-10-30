@@ -105,3 +105,24 @@ Luồng L4 – Phân công kỹ thuật viên và lịch hẹn · Nguyễn Thái
 - Lý do             : Giữ nguyên mã gốc của dataset để dữ liệu không bị lệch mà không báo lỗi.
 - Ảnh hưởng         : seed_dataset.py đọc issue_categories.csv và in tên trung tâm; dữ liệu rút gọn db/seed/, test tích hợp,
                       trang đăng nhập và ví dụ JSON trong docs/api-contract.md đổi Tân Bình sang mã 2.
+
+## Buổi 12 – Hoàn thiện và nộp Bài tập 2
+
+### TD-13 Bổ sung CRUD đủ cho 2 thực thể: kỹ thuật viên và lịch hẹn
+- Phản hồi / vấn đề : Mục kiểm chứng S1 của BT2 (track SE) yêu cầu ≥ 2 thực thể đủ CRUD; phiếu bảo hành chỉ được đọc
+                      và phân công (tạo phiếu thuộc L2 – W1).
+- Quyết định        : SỬA
+- Lý do             : Chọn 2 thực thể có trong ERD và thuộc phạm vi quản lý trung tâm: kỹ thuật viên (E9 – E13) và lịch hẹn
+                      (E5, E14 – E16). "Xoá" là xoá mềm theo QT-13: kỹ thuật viên ngừng hoạt động (is_active = false,
+                      không cho khi còn giữ phiếu mở), lịch hẹn chuyển DA_HUY kèm lý do. Lịch hẹn chỉ sửa/hủy khi DA_HEN và
+                      chưa đến giờ bắt đầu (QT-L4-06, khôi phục lại). W10 "hủy lịch hẹn thủ công" chuyển vào phạm vi.
+- Ảnh hưởng         : api/technicians.py, api/appointments.py, services/technician_service.py, AppointmentService,
+                      repositories; docs/api-contract.md mục 7; 14 test mới (35 test tổng). Sơ đồ docs/architecture.drawio cập nhật
+                      theo mã đã hiện thực: mỗi lớp ghi thư mục mã, thêm TechnicianService, 16 endpoint E1 – E16.
+
+### TD-14 Suy giảm có kiểm soát khi CSDL tắt
+- Phản hồi / vấn đề : Mục C7 – tắt một thành phần phụ trợ, nghiệp vụ chính phải báo lỗi rõ, không trả lỗi thô.
+- Quyết định        : SỬA
+- Lý do             : Handler psycopg.OperationalError trả 503 DATABASE_UNAVAILABLE; handler chung trả 500 INTERNAL_ERROR
+                      không lộ chi tiết thư viện, chi tiết ghi vào log.
+- Ảnh hưởng         : src/backend/api/errors.py; docs/bug-log.md BUG-06.

@@ -103,3 +103,37 @@ def test_bien_khung_gio_qt_l4_03(start, end, ok):
 def test_lich_hen_ke_tiep_sat_nhau_khong_tinh_la_trung():                  # biên: 09:30 bắt đầu ngay khi lịch trước kết thúc
     uow = FakeUow(existing=[(at(SAT, 9), at(SAT, 9, 30))])
     assert create(uow, at(SAT, 9, 30), at(SAT, 10))["status"] == "DA_HEN"
+
+
+# ---------- sửa giờ / hủy lịch hẹn (TD-13) ----------
+class FakeUowAppt(FakeUow):
+    def __init__(self, status="DA_HEN", start=None, others=()):
+        super().__init__(existing=others)
+        start = start or at(SAT, 9)
+        self.appt = {"appointment_id": 7, "center_id": 4, "technician_id": 1, "status": status, "start_at": start,
+                     "end_at": start + timedelta(minutes=30), "note": None}
+        outer = self
+        base = self.appointments
+
+        class Appts:
+            def get(self, i): return outer.appt
+            def find_conflict(self, t, s, e, exclude_id=None): return base.find_conflict(t, s, e)
+            def update_time(self, i, s, e, note): return {**outer.appt, "start_at": s, "end_at": e}
+            def cancel(self, i, note): return {**outer.appt, "status": "DA_HUY", "note": note}
+
+        self.appointments = Appts()
+
+
+def test_sua_gio_lich_hen_sang_khung_trong():
+    r = AppointmentService(FakeUowAppt()).reschedule(7, at(SAT, 14), at(SAT, 14, 30), None, User(), now=NOW)
+    assert r["start_at"] == at(SAT, 14)
+
+
+def test_khong_huy_lich_hen_da_qua_gio():                                    # QT-L4-06
+    with pytest.raises(InvalidState):
+        AppointmentService(FakeUowAppt(start=at(NOW, 6))).cancel(7, "Khách báo bận hôm nay", User(), now=NOW)
+
+
+def test_huy_lich_hen_can_ly_do_toi_thieu_10_ky_tu():                         # biên lý do
+    with pytest.raises(ValidationFailed):
+        AppointmentService(FakeUowAppt()).cancel(7, "bận", User(), now=NOW)

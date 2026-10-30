@@ -17,12 +17,13 @@ Giải quyết V2 (không biết phiếu đang ở đâu) và V3 (phân công th
   Mật khẩu chỉ ghi trong `.env`, không commit.
 
 ## 3. Các bước dựng và chạy hệ thống (mỗi bước một lệnh, chạy trong **cmd** tại thư mục gốc repo)
-Yêu cầu trước: đã cài Python 3.12, PostgreSQL 16 và đã tạo database `smartcrm` (pgAdmin → Databases → Create).
+Yêu cầu trước: **Python 3.12**, **PostgreSQL 16**, Git; đã tạo database `smartcrm` (pgAdmin → Databases → Create).
+Thư viện ghi phiên bản cố định (`==`) trong `requirements.txt`.
 
 | Bước | Lệnh | Kết quả mong đợi |
 |---|---|---|
-| 1 | `git clone https://github.com/Thaiduc2374802010117/smartcrm-2374802010117-technician-assignment.git` | Có thư mục repo |
-| 1b | `cd smartcrm-2374802010117-technician-assignment` | Đang ở thư mục gốc repo |
+| 1 | `git clone --branch v0.2 https://github.com/Thaiduc2374802010117/smartcrm-2374802010117-technician-assignment.git thu-nghiem` | Có thư mục `thu-nghiem` (bản nộp BT2, tag v0.2) |
+| 1b | `cd thu-nghiem` | Đang ở thư mục gốc repo |
 | 2 | `py -m venv .venv` | Có thư mục `.venv` |
 | 3 | `.venv\Scripts\activate` | Đầu dòng lệnh hiện `(.venv)` |
 | 4 | `pip install -r requirements.txt` | Cài xong FastAPI, psycopg, pytest… |
@@ -31,10 +32,12 @@ Yêu cầu trước: đã cài Python 3.12, PostgreSQL 16 và đã tạo databas
 | 7 | `python -m src.backend.seed_dataset --data data/official --reopen 5` | Nạp dataset thật, in số dòng và số phiếu MOI mỗi trung tâm |
 | 8 | `uvicorn src.backend.main:app --port 3000` (để cửa sổ này chạy) | `Uvicorn running on http://127.0.0.1:3000` |
 | 9 | Mở **cửa sổ cmd thứ hai** tại thư mục repo: `python -m http.server 5500 -d src/frontend` | Mở http://localhost:5500 → trang đăng nhập |
-| 10 | Cửa sổ thứ ba (đã activate `.venv`): `python -m pytest -v` | `21 passed` |
+| 10 | Cửa sổ thứ ba (đã activate `.venv`): `python -m pytest -v` | `35 passed` |
+| 11 | (tùy chọn) Cửa sổ thứ ba: `powershell -ExecutionPolicy Bypass -File scripts\demo-crud.ps1` | Gọi CRUD đủ cho 2 thực thể, in mã HTTP từng bước |
 
 - Bước 7 cần bộ **Mekong Mobile – Dataset Smart CRM** (E-learning) giải nén vào `data/official/`. Nếu chưa có: chạy
   `python -m src.backend.migrate --seed` để dùng dữ liệu mẫu rút gọn.
+- **Chạy lại lần hai (C5):** bước 6 và bước 7 chạy lại bao nhiêu lần cũng được – migration dùng `IF NOT EXISTS`, bộ nạp xoá rồi nạp lại nên số dòng không nhân đôi (luôn 7.800 phiếu).
 - Đăng nhập: nhập mã nhân viên bất kỳ và **mã trung tâm** in ra ở bước 7 (dataset thật: 2 = TTBH Quận Tân Bình; dữ liệu rút gọn cũng dùng mã 2).
 - Luồng chính: Đăng nhập → **M1** Phiếu chờ phân công → Phân công → **M2** chọn kỹ thuật viên gợi ý → Phân công →
   Đặt lịch hẹn → **M3** lưu lịch hẹn. Tài liệu API: http://localhost:3000/docs
@@ -51,22 +54,31 @@ Yêu cầu trước: đã cài Python 3.12, PostgreSQL 16 và đã tạo databas
 | `docs/` | — | SRS, sơ đồ `.drawio`, ERD, wireframe, API contract, nhật ký thay đổi thiết kế, ảnh chụp kết quả |
 
 ## 5. Kiểm thử
-`python -m pytest -v` → **21 test PASS** (in số test trên màn hình):
-- `test_assignment_service.py` – 6 test: phân công đúng, tay nghề < 3, khác trung tâm, phiếu đã phân công, QT-14, NFR3.
-- `test_appointment_service.py` – 12 test: luồng đúng · **biên** 15/14 phút, 120/121 phút, 08:00, 18:00, lịch sát nhau ·
-  **dữ liệu sai** Chủ nhật, quá khứ, phiếu chưa có kỹ thuật viên, **trùng 09:15–09:45 với 09:00–09:30**.
-- `test_integration_db.py` – 3 test trên PostgreSQL thật (database `smartcrm_test`, tự tạo): **TC07** 2 yêu cầu phân công
-  cùng lúc → đúng 1 thành công, 1 dòng lịch sử · **TC10** ràng buộc EXCLUDE · AC2.1 thứ tự gợi ý. Tự bỏ qua nếu không có PostgreSQL.
+`python -m pytest -v` → **35 test PASS** bằng một lệnh, đủ ba loại **luồng đúng · biên · dữ liệu sai**:
+- `test_assignment_service.py` (6) – phân công đúng; tay nghề < 3, khác trung tâm, phiếu đã phân công, QT-14; NFR3.
+- `test_appointment_service.py` (15) – luồng đúng · **biên** 15/14 phút, 120/121 phút, 08:00, 18:00, lý do hủy < 10 ký tự ·
+  **dữ liệu sai** Chủ nhật, quá khứ, phiếu chưa có KTV, **trùng 09:15–09:45 với 09:00–09:30**, hủy lịch đã qua giờ; sửa giờ.
+- `test_technician_service.py` (7) – thêm KTV; họ tên 1/121 ký tự, bậc sai; không ngừng hoạt động KTV đang giữ phiếu; xoá mềm; QT-14.
+- `test_integration_db.py` (3) – PostgreSQL thật (database riêng `smartcrm_test`, tự tạo): **TC07** NFR3, **TC10** EXCLUDE, AC2.1.
+- `test_api_crud.py` (4) – gọi API qua HTTP: **CRUD đủ cho 2 thực thể** (kỹ thuật viên, lịch hẹn), dữ liệu sai → 400,
+  **CSDL tắt → 503** `DATABASE_UNAVAILABLE` (C7). Test tích hợp tự bỏ qua nếu máy không có PostgreSQL.
 
-## 6. Trạng thái hiện tại (buổi 10)
+### Thử CRUD bằng curl (cmd, backend đang chạy)
+```
+curl -s -H "X-Employee-Id: 3" -H "X-Role: QUAN_LY" -H "X-Center-Id: 2" localhost:3000/api/technicians
+curl -s -X POST -H "X-Employee-Id: 3" -H "X-Role: QUAN_LY" -H "X-Center-Id: 2" -H "Content-Type: application/json" -d "{\"full_name\":\"Tran Van Moi\",\"level\":\"SO_CAP\"}" localhost:3000/api/technicians
+```
+Danh sách đầy đủ 16 endpoint và mã lỗi: `docs/api-contract.md` · thử trực quan: http://localhost:3000/docs
+
+## 6. Trạng thái hiện tại (buổi 12 – nộp BT2, tag `v0.2`)
 - [x] Module Phân công: E1, E2, E3 qua 3 lớp; NFR3 đã kiểm chứng (TC07)
-- [x] Module Lịch hẹn: E4, E5, chặn trùng lịch ở lớp nghiệp vụ và bằng EXCLUDE ở CSDL (TC10)
-- [x] Giao diện 3 màn hình M1 – M3 theo wireframe BT1, gọi API thật; DataState cho cả 3 màn hình
-- [x] Đăng nhập giả lập; nhận 401 thì xoá người dùng, về trang đăng nhập; tắt backend thấy lỗi có nút Thử lại
-- [x] Luồng chính end-to-end: đăng nhập → M1 → M2 phân công → M3 đặt lịch hẹn
-- [x] Bộ nạp Dataset Smart CRM (`seed_dataset.py`), 21 test PASS
-- [ ] E6 đổi kỹ thuật viên, E7 phiếu của kỹ thuật viên, E8 khối lượng công việc – đã hoãn, xem TD-09
-- [ ] Đóng gói Docker (buổi 11), PDF báo cáo BT2 và tag v0.2 (buổi 12)
+- [x] Module Lịch hẹn: E4, E5, E14 – E16 (tạo, xem, sửa giờ, hủy), chặn trùng ở lớp nghiệp vụ và bằng EXCLUDE (TC10)
+- [x] Danh mục kỹ thuật viên: E9 – E13 – **CRUD đủ cho 2 thực thể** (TD-13)
+- [x] Giao diện 3 màn hình M1 – M3 gọi API thật, đủ ba trạng thái; đăng nhập giả lập, xử lý 401
+- [x] Dữ liệu thật Dataset Smart CRM (7.800 phiếu); chạy lại không nhân đôi
+- [x] Suy giảm có kiểm soát: tắt backend → giao diện báo lỗi có nút Thử lại; tắt CSDL → API trả 503 rõ ràng (TD-14)
+- [x] 35 test PASS; `docs/bug-log.md` 6 lỗi đã gỡ
+- [ ] E6 đổi kỹ thuật viên, E7, E8 – hoãn (TD-09); Docker – chưa làm
 
 ## 7. Khai báo sử dụng công cụ AI
 Xem `docs/ai-disclosure.md`.

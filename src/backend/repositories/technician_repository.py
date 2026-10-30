@@ -30,3 +30,29 @@ class TechnicianRepository:
             "WHERE t.center_id = %s AND t.is_active AND s.category_id = %s AND s.proficiency >= %s "
             "ORDER BY open_ticket_count ASC, s.proficiency DESC, t.technician_id ASC LIMIT %s",
             (list(self.OPEN_STATUSES), center_id, category_id, min_proficiency, limit)).fetchall()
+
+    COLUMNS = "technician_id, full_name, center_id, level, is_active"
+
+    def list_by_center(self, center_id: int, include_inactive: bool = False):
+        rows = self.conn.execute(
+            f"SELECT t.technician_id, t.full_name, t.center_id, t.level, t.is_active, "
+            f"  (SELECT count(*) FROM ticket k WHERE k.technician_id = t.technician_id AND k.is_deleted = false "
+            f"     AND k.status = ANY(%s)) AS open_ticket_count "
+            f"FROM technician t WHERE t.center_id = %s AND (t.is_active OR %s) ORDER BY t.full_name",
+            (list(self.OPEN_STATUSES), center_id, include_inactive)).fetchall()
+        return rows
+
+    def create(self, full_name: str, center_id: int, level: str):
+        return self.conn.execute(
+            f"INSERT INTO technician (full_name, center_id, level) VALUES (%s, %s, %s) RETURNING {self.COLUMNS}",
+            (full_name, center_id, level)).fetchone()
+
+    def update(self, technician_id: int, full_name: str, level: str, is_active: bool):
+        return self.conn.execute(
+            f"UPDATE technician SET full_name = %s, level = %s, is_active = %s WHERE technician_id = %s "
+            f"RETURNING {self.COLUMNS}", (full_name, level, is_active, technician_id)).fetchone()
+
+    def count_open_tickets(self, technician_id: int) -> int:
+        return self.conn.execute(
+            "SELECT count(*) AS n FROM ticket WHERE technician_id = %s AND is_deleted = false AND status = ANY(%s)",
+            (technician_id, list(self.OPEN_STATUSES))).fetchone()["n"]

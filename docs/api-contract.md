@@ -311,3 +311,22 @@ Thiếu header hoặc giá trị không hợp lệ → **401**. Đúng vai trò 
 - [x] Mọi trường request body có cột tương ứng trong mô hình dữ liệu dự kiến trong ERD (`ticket`, `technician`, `technician_skill`, `issue_category`, `appointment`, `ticket_status_log`) – đã đối chiếu với `schema.sql`.
 - [x] Không có endpoint thừa.
 - [x] QT-06, QT-07, QT-08, QT-14 và QT-L4-01…05 xuất hiện trong bảng validation hoặc mã lỗi.
+
+
+## 7. Bổ sung ở BT2 – CRUD đủ cho 2 thực thể (TD-13)
+
+Cùng quy ước chung (header giả lập, cấu trúc lỗi `{ "error": { code, message, fields } }`), chỉ vai trò `QUAN_LY`,
+chỉ dữ liệu của trung tâm trong `X-Center-Id` (QT-14). "Xoá" là xoá mềm (QT-13).
+
+| # | Phương thức | Đường dẫn | Mục đích | Thành công | Lỗi |
+|---|---|---|---|---|---|
+| E9 | GET | `/api/technicians?include_inactive=false` | Danh sách kỹ thuật viên của trung tâm, kèm số phiếu đang mở | 200 `{center_id, items:[…]}` | 401 · 403 |
+| E10 | POST | `/api/technicians` | Thêm kỹ thuật viên `{full_name, level}` (trung tâm lấy theo người dùng) | 201 | 400 họ tên 2–120 ký tự, bậc không hợp lệ · 403 |
+| E11 | GET | `/api/technicians/{id}` | Xem một kỹ thuật viên | 200 | 403 trung tâm khác · 404 |
+| E12 | PUT | `/api/technicians/{id}` | Sửa `{full_name, level, is_active}` | 200 | 400 · 403 · 404 · 409 `TECHNICIAN_HAS_OPEN_TICKETS` |
+| E13 | DELETE | `/api/technicians/{id}` | Ngừng hoạt động (`is_active = false`) | 200 | 403 · 404 · 409 `TECHNICIAN_HAS_OPEN_TICKETS` |
+| E14 | GET | `/api/appointments/{id}` | Xem một lịch hẹn | 200 | 403 · 404 |
+| E15 | PUT | `/api/appointments/{id}` | Sửa giờ `{start_at, end_at, note}` – kiểm QT-L4-03, chống trùng (bỏ qua chính nó) | 200 | 400 khung giờ · 409 `APPOINTMENT_CONFLICT` hoặc không còn DA_HEN |
+| E16 | DELETE | `/api/appointments/{id}?reason=…` | Hủy kèm lý do (10–255 ký tự, tham số URL) – chuyển DA_HUY | 200 | 400 · 409 đã hủy / đã qua giờ |
+
+Khi không kết nối được CSDL, mọi endpoint trả **503** `DATABASE_UNAVAILABLE` (TD-14).

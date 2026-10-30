@@ -1,23 +1,19 @@
-﻿# Bí mật - KHÔNG BAO GIỜ commit
-.env
-
-# Dependencies & build
-node_modules/
-bin/
-obj/
-target/
-dist/
-__pycache__/
+# Python
 .venv/
 venv/
+__pycache__/
+*.pyc
+.pytest_cache/
 
-# Dữ liệu & model lớn
+# Bí mật – KHÔNG commit (dùng .env.example)
+.env
+
+# Dữ liệu thô lớn, log, tệp tạm
 data/raw/
-models/*.pkl
-models/*.pt
+*.log
 
-# IDE / OS
+# Editor / hệ điều hành
 .vscode/
 .idea/
-.DS_Store
 Thumbs.db
+desktop.ini

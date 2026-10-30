@@ -1,7 +1,8 @@
-"""AppointmentService – đặt lịch hẹn giao – nhận máy, chặn trùng lịch (US5, FR5, UC4 · E4, E5).
+"""AppointmentService – đặt, xem, sửa giờ, hủy lịch hẹn giao – nhận máy (US5, FR5, UC4 · E4, E5, E14 – E16).
 
 Quy tắc: QT-L4-02 (không trùng lịch DA_HEN của cùng kỹ thuật viên), QT-L4-03 (15–120 phút, 08:00–18:00,
-thứ Hai – thứ Bảy, bắt đầu sau hiện tại), QT-L4-04 (chỉ cho phiếu đã có kỹ thuật viên), QT-14.
+thứ Hai – thứ Bảy, bắt đầu sau hiện tại), QT-L4-04 (chỉ cho phiếu đã có kỹ thuật viên), QT-14,
+QT-L4-06 (chỉ sửa/hủy lịch hẹn DA_HEN chưa đến giờ bắt đầu; hủy là chuyển DA_HUY, không xoá – QT-13).
 """
 from datetime import datetime, time, timedelta, timezone
 
@@ -89,3 +90,45 @@ class AppointmentService:
                                    "conflict_start_at": conflict["start_at"].isoformat() if conflict else "",
                                    "conflict_end_at": conflict["end_at"].isoformat() if conflict else "",
                                    "suggested_start_at": conflict["end_at"].isoformat() if conflict else ""})
+
+    # ---------- CRUD bổ sung cho BT2 (TD-13) ----------
+    def _own(self, uow, appointment_id, user):
+        a = uow.appointments.get(appointment_id)
+        if a is None:
+            raise NotFound("Không tìm thấy lịch hẹn", fields={"appointment_id": str(appointment_id)})
+        if a["center_id"] != user.center_id:                                # QT-14
+            raise Forbidden("Không có quyền với lịch hẹn của trung tâm khác")
+        return a
+
+    def get(self, appointment_id: int, user):
+        with self.uow_factory() as uow:
+            return dict(self._own(uow, appointment_id, user))
+
+    def reschedule(self, appointment_id: int, start: datetime, end: datetime, note, user, now=None):
+        now = now or datetime.now(VN)
+        fields = check_time_slot(start, end, now)
+        if fields:
+            raise ValidationFailed("Khung giờ không hợp lệ", fields=fields)
+        with self.uow_factory() as uow:
+            a = self._own(uow, appointment_id, user)
+            if a["status"] != "DA_HEN" or _vn(a["start_at"]) <= _vn(now):     # QT-L4-06
+                raise InvalidState("Chỉ sửa được lịch hẹn DA_HEN chưa đến giờ bắt đầu", fields={"current_status": a["status"]})
+            conflict = uow.appointments.find_conflict(a["technician_id"], start, end, exclude_id=appointment_id)
+            if conflict is None:
+                try:
+                    return dict(uow.appointments.update_time(appointment_id, start, end, note if note is not None else a["note"]))
+                except AppointmentConflict:
+                    conflict = uow.appointments.find_conflict(a["technician_id"], start, end, exclude_id=appointment_id)
+        raise InvalidState("Kỹ thuật viên đã có lịch hẹn trong khung giờ này", code="APPOINTMENT_CONFLICT",
+                           fields={"conflict_appointment_id": str(conflict["appointment_id"]) if conflict else "",
+                                   "suggested_start_at": conflict["end_at"].isoformat() if conflict else ""})
+
+    def cancel(self, appointment_id: int, reason, user, now=None):
+        now = now or datetime.now(VN)
+        if not isinstance(reason, str) or not 10 <= len(reason.strip()) <= 255:
+            raise ValidationFailed("Dữ liệu không hợp lệ", fields={"reason": "Lý do hủy từ 10 đến 255 ký tự"})
+        with self.uow_factory() as uow:
+            a = self._own(uow, appointment_id, user)
+            if a["status"] != "DA_HEN" or _vn(a["start_at"]) <= _vn(now):     # QT-L4-06
+                raise InvalidState("Chỉ hủy được lịch hẹn DA_HEN chưa đến giờ bắt đầu", fields={"current_status": a["status"]})
+            return dict(uow.appointments.cancel(appointment_id, reason.strip()))

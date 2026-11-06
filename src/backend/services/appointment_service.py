@@ -107,6 +107,8 @@ class AppointmentService:
     def reschedule(self, appointment_id: int, start: datetime, end: datetime, note, user, now=None):
         now = now or datetime.now(VN)
         fields = check_time_slot(start, end, now)
+        if note is not None and len(note) > 255:                          # BUG-08: cùng quy tắc với create()
+            fields["note"] = "Ghi chú tối đa 255 ký tự"
         if fields:
             raise ValidationFailed("Khung giờ không hợp lệ", fields=fields)
         with self.uow_factory() as uow:

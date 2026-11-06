@@ -4,7 +4,7 @@ E5  POST /api/tickets/{ticket_id}/appointments                   – tạo lịc
 E14 GET    /api/appointments/{id}  – xem một lịch hẹn
 E15 PUT    /api/appointments/{id}  – sửa giờ lịch hẹn (kiểm QT-L4-03, chống trùng)
 E16 DELETE /api/appointments/{id}?reason=...  – hủy lịch hẹn kèm lý do (chuyển DA_HUY, không xoá – QT-13)"""
-from datetime import datetime
+from datetime import datetime, timedelta, timezone
 
 from fastapi import APIRouter, Depends, Query
 from pydantic import BaseModel, Field
@@ -15,6 +15,12 @@ from .auth import CurrentUser, require_role
 
 router = APIRouter(tags=["Lịch hẹn"])
 service = AppointmentService(UnitOfWork)
+VN = timezone(timedelta(hours=7))
+
+
+def _with_tz(dt: datetime) -> datetime:
+    """BUG-10: thời gian không ghi múi giờ được hiểu là giờ Việt Nam (+07:00), tránh so sánh lẫn hai kiểu thời gian."""
+    return dt if dt.tzinfo else dt.replace(tzinfo=VN)
 
 
 class AppointmentIn(BaseModel):
@@ -27,7 +33,7 @@ class AppointmentIn(BaseModel):
 @router.get("/api/technicians/{technician_id}/appointments", summary="E4 – Lịch hẹn của kỹ thuật viên")
 def list_appointments(technician_id: int, from_: datetime = Query(alias="from"), to: datetime = Query(),
                       user: CurrentUser = Depends(require_role("QUAN_LY"))):
-    return service.list_for_technician(technician_id, from_, to, user)
+    return service.list_for_technician(technician_id, _with_tz(from_), _with_tz(to), user)
 
 
 @router.post("/api/tickets/{ticket_id}/appointments", status_code=201, summary="E5 – Tạo lịch hẹn giao – nhận máy")

@@ -56,3 +56,12 @@ tái lập → khoanh vùng → sửa nguyên nhân → xác nhận.
 - Cách sửa     : Handler trả 503 `DATABASE_UNAVAILABLE` "Không kết nối được cơ sở dữ liệu…", ghi log; handler chung trả 500 `INTERNAL_ERROR` không lộ chi tiết.
 - Xác nhận     : `tests/test_api_crud.py::test_csdl_tat_tra_503_ro_rang_khong_treo` PASS; giao diện hiện lỗi kèm nút Thử lại.
 - Commit       : commit "fix(api): bao loi 503 ro rang khi CSDL tat" (buổi 12)
+
+## BUG-07 · requirements.txt không đọc được như tệp khoá UTF-8 (nhận xét BT2 – mục C6)
+- Hiện tượng   : Giảng viên chấm C6 "requirements.txt chưa khoá toàn bộ phiên bản bằng ==", dù trên máy em pip vẫn cài được.
+- Tái lập      : Mở requirements.txt bằng công cụ đọc UTF-8 (hoặc chạy `tests/test_requirements.py` trên bản cũ) → ký tự lạ, không nhận ra dòng `==`.
+- Khoanh vùng  : Tệp requirements.txt tạo ở buổi 2 bằng `pip freeze > requirements.txt` trong PowerShell.
+- Nguyên nhân  : Windows PowerShell 5 ghi tệp chuyển hướng bằng UTF-16; pip tự nhận ra nhưng công cụ đọc UTF-8 thì không.
+- Cách sửa     : Tạo lại bằng cmd (`pip freeze > requirements.txt` cho ra UTF-8/ASCII); thêm `tests/test_requirements.py` kiểm tra mọi dòng có `==` và tệp không phải UTF-16.
+- Xác nhận     : `python -m pytest -v` → 37 passed; `findstr /v "==" requirements.txt` không in dòng nào.
+- Commit       : commit "fix(deps): khoa phien ban requirements bang == dang UTF-8" (sau khi chấm BT2)

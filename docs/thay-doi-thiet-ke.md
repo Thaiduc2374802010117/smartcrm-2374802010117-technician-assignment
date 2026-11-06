@@ -126,3 +126,14 @@ Luồng L4 – Phân công kỹ thuật viên và lịch hẹn · Nguyễn Thái
 - Lý do             : Handler psycopg.OperationalError trả 503 DATABASE_UNAVAILABLE; handler chung trả 500 INTERNAL_ERROR
                       không lộ chi tiết thư viện, chi tiết ghi vào log.
 - Ảnh hưởng         : src/backend/api/errors.py; docs/bug-log.md BUG-06.
+
+## Sau phản hồi Bài tập 2
+
+Điểm BT2: Đạt đủ mục cốt lõi; chưa đạt C6.
+
+### TD-15 Tệp khoá thư viện chuẩn UTF-8, có test bảo vệ
+- Phản hồi của GV : requirements.txt chưa khoá toàn bộ phiên bản bằng "==" (C6).
+- Quyết định      : SỬA
+- Lý do           : Tệp cũ là UTF-16 (tạo bằng PowerShell) nên công cụ đọc UTF-8 không nhận ra các dòng "==".
+- Ảnh hưởng       : requirements.txt tạo lại bằng cmd; tests/test_requirements.py (2 test) chặn lỗi tái diễn; bug-log BUG-07;
+                    bản sửa gắn tag v0.2.1 (giữ nguyên tag v0.2 đã nộp để đối chiếu).

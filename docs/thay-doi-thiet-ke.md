@@ -137,3 +137,18 @@ Luồng L4 – Phân công kỹ thuật viên và lịch hẹn · Nguyễn Thái
 - Lý do           : Tệp cũ là UTF-16 (tạo bằng PowerShell) nên công cụ đọc UTF-8 không nhận ra các dòng "==".
 - Ảnh hưởng       : requirements.txt tạo lại bằng cmd; tests/test_requirements.py (2 test) chặn lỗi tái diễn; bug-log BUG-07;
                     bản sửa gắn tag v0.2.1 (giữ nguyên tag v0.2 đã nộp để đối chiếu).
+
+## Buổi 14 – Kiểm thử hệ thống (chuẩn bị Bài tập 3)
+
+### TD-16 Bộ 12 test case BT3, sửa bug theo kết quả chạy thật, CI
+- Phản hồi / vấn đề : BT3 yêu cầu Test Plan, Test Report 10–12 test case chạy thật đủ năm loại, Bug Log ≥ 3 bug mỗi bug
+                      một commit; giảng viên chọn ngẫu nhiên một test case để chạy lại tại chỗ.
+- Quyết định        : SỬA (bổ sung)
+- Lý do             : Mỗi test case chạy được bằng MỘT lệnh (`python -m scripts.run_tc TC-xx`), resetDb trên database riêng
+                      `smartcrm_test`, in đủ tám cột và ghi lịch sử chạy thật vào `docs/test-runs.jsonl`; Test Report sinh từ
+                      lịch sử đó nên không thể chép cột mong đợi sang cột thực tế. Lần chạy đầu TC-08, TC-11 FAIL → BUG-08,
+                      BUG-09; kiểm thử thăm dò tìm thêm BUG-10; sửa mỗi bug một commit `fix(...): ... (BUG-xx)`.
+- Ảnh hưởng         : docs/test-plan.md, docs/test-report.md, docs/bug-log.md (viết lại theo mẫu bảy dòng của buổi 13),
+                      tests/tc_bt3.py, tests/test_tc_bt3.py, tests/test_bug08..10, scripts/run_tc.py, scripts/fill_bug_links.py,
+                      .github/workflows/ci.yml; sửa appointment_service.py (BUG-08), api/auth.py (BUG-09),
+                      api/appointments.py (BUG-10). Bộ kiểm thử 37 → 58 test.

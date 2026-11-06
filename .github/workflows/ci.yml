@@ -1,0 +1,26 @@
+# CI: mỗi lần push, GitHub cấp máy sạch, cài đúng requirements.txt rồi chạy toàn bộ bộ kiểm thử (phép thử máy trắng tự động).
+name: CI
+on: [push, pull_request]
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    services:
+      db:
+        image: postgres:16
+        env:
+          POSTGRES_PASSWORD: test          # mật khẩu THỬ chỉ dùng trong CI, không phải secret thật
+        ports: ["5432:5432"]
+        options: >-
+          --health-cmd pg_isready --health-interval 5s --health-timeout 5s --health-retries 10
+    env:
+      DB_HOST: localhost
+      DB_PORT: "5432"
+      DB_NAME: smartcrm_test
+      DB_USER: postgres
+      DB_PASSWORD: test
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: { python-version: "3.12", cache: pip }
+      - run: pip install -r requirements.txt
+      - run: python -m pytest -q

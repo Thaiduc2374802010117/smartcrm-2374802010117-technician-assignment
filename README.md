@@ -32,7 +32,7 @@ Thư viện ghi phiên bản cố định (`==`) trong `requirements.txt`.
 | 7 | `python -m src.backend.seed_dataset --data data/official --reopen 5` | Nạp dataset thật, in số dòng và số phiếu MOI mỗi trung tâm |
 | 8 | `uvicorn src.backend.main:app --port 3000` (để cửa sổ này chạy) | `Uvicorn running on http://127.0.0.1:3000` |
 | 9 | Mở **cửa sổ cmd thứ hai** tại thư mục repo: `python -m http.server 5500 -d src/frontend` | Mở http://localhost:5500 → trang đăng nhập |
-| 10 | Cửa sổ thứ ba (đã activate `.venv`): `python -m pytest -v` | `37 passed` |
+| 10 | Cửa sổ thứ ba (đã activate `.venv`): `python -m pytest -v` | `58 passed` |
 | 11 | (tùy chọn) Cửa sổ thứ ba: `powershell -ExecutionPolicy Bypass -File scripts\demo-crud.ps1` | Gọi CRUD đủ cho 2 thực thể, in mã HTTP từng bước |
 
 - Bước 7 cần bộ **Mekong Mobile – Dataset Smart CRM** (E-learning) giải nén vào `data/official/`. Nếu chưa có: chạy
@@ -54,15 +54,14 @@ Thư viện ghi phiên bản cố định (`==`) trong `requirements.txt`.
 | `docs/` | — | SRS, sơ đồ `.drawio`, ERD, wireframe, API contract, nhật ký thay đổi thiết kế, ảnh chụp kết quả |
 
 ## 5. Kiểm thử
-`python -m pytest -v` → **37 test PASS** bằng một lệnh, đủ ba loại **luồng đúng · biên · dữ liệu sai**:
-- `test_assignment_service.py` (6) – phân công đúng; tay nghề < 3, khác trung tâm, phiếu đã phân công, QT-14; NFR3.
-- `test_appointment_service.py` (15) – luồng đúng · **biên** 15/14 phút, 120/121 phút, 08:00, 18:00, lý do hủy < 10 ký tự ·
-  **dữ liệu sai** Chủ nhật, quá khứ, phiếu chưa có KTV, **trùng 09:15–09:45 với 09:00–09:30**, hủy lịch đã qua giờ; sửa giờ.
-- `test_technician_service.py` (7) – thêm KTV; họ tên 1/121 ký tự, bậc sai; không ngừng hoạt động KTV đang giữ phiếu; xoá mềm; QT-14.
-- `test_integration_db.py` (3) – PostgreSQL thật (database riêng `smartcrm_test`, tự tạo): **TC07** NFR3, **TC10** EXCLUDE, AC2.1.
-- `test_requirements.py` (2) – mọi dòng requirements.txt khoá phiên bản bằng `==`, tệp đọc được bằng UTF-8 (C6).
-- `test_api_crud.py` (4) – gọi API qua HTTP: **CRUD đủ cho 2 thực thể** (kỹ thuật viên, lịch hẹn), dữ liệu sai → 400,
-  **CSDL tắt → 503** `DATABASE_UNAVAILABLE` (C7). Test tích hợp tự bỏ qua nếu máy không có PostgreSQL.
+[![CI](https://github.com/Thaiduc2374802010117/smartcrm-2374802010117-technician-assignment/actions/workflows/ci.yml/badge.svg)](https://github.com/Thaiduc2374802010117/smartcrm-2374802010117-technician-assignment/actions)
+
+- **Toàn bộ bộ kiểm thử – một lệnh:** `python -m pytest -q` → **58 passed** (unit 35 · integration 3 · API 18 · cấu hình 2).
+- **Một test case của Test Report (in đủ tám cột):** `python -m scripts.run_tc TC-05` · cả 12: `python -m scripts.run_tc --all`.
+- **Sinh Test Report từ lịch sử chạy thật:** `python -m scripts.run_tc --report` → `docs/test-report.md`.
+- Tài liệu: `docs/test-plan.md` (Test Plan bốn mục) · `docs/test-report.md` (12 test case) · `docs/bug-log.md` (Bug Log bảy dòng).
+- Test tích hợp và test case BT3 dùng database RIÊNG `smartcrm_test` (tự tạo, resetDb trước mỗi test) – không đụng dữ liệu `smartcrm`.
+- CI: `.github/workflows/ci.yml` chạy `pytest -q` trên máy sạch của GitHub (dịch vụ PostgreSQL 16) mỗi lần push.
 
 ### Thử CRUD bằng curl (cmd, backend đang chạy)
 ```

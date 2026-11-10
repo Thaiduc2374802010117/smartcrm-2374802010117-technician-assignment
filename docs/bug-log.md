@@ -52,6 +52,15 @@ Mỗi bug của BT3 sửa trong **một commit riêng** `fix(...): ... (BUG-xx)`
 6. Cách sửa      : Thay bằng `GET /health`: 200 `{"status":"ok","db":"up"}` hoặc **503** `{"status":"degraded","db":"down"}`, chi tiết lỗi chỉ ghi log (chỉ tên loại lỗi); `/db-check` giữ làm bí danh của `/health`; thêm `tests/test_bug11_health_khong_lo_cau_hinh.py`.
 7. Commit và xác nhận : [6d1bf29](https://github.com/Thaiduc2374802010117/smartcrm-2374802010117-technician-assignment/commit/6d1bf29163931a44094938f44764ea4366faddc1) · gọi lại khi CSDL hỏng → 503, không có "127.0.0.1", "5432", "user"; toàn bộ bộ test PASS.
 
+### BUG-12 — Thư viện certifi có lỗ hổng đã công bố (PYSEC-2026-4320)
+1. Mã và mức độ : BUG-12 · **MINOR** — câu (1): không, chưa có dữ liệu bị sai hay bị lộ; câu (2): không – certifi chỉ dùng cho kết nối HTTPS ra ngoài (qua httpx), ứng dụng khi chạy thật không gọi HTTPS ra ngoài, httpx chỉ dùng trong test; vẫn sửa ngay vì đã có bản vá (OWASP A03 – chuỗi cung ứng).
+2. Phát hiện bởi : Chạy thử checklist bảo mật mục 7 (buổi 15) – `pip-audit -r requirements.txt`.
+3. Triệu chứng   : `Found 2 known vulnerabilities in 1 package` – `certifi 2026.7.22 PYSEC-2026-4320`, bản vá `2026.10.18` (hai dòng cùng một mã lỗ hổng).
+4. Cách tái lập : `pip install pip-audit` → `pip-audit -r requirements.txt` trên requirements.txt cũ – lặp lại 2/2 lần.
+5. Nguyên nhân   : Tệp khoá ghim certifi ở phiên bản trước khi lỗ hổng được vá; ghim phiên bản giữ cố định cả lỗ hổng nếu không kiểm định kỳ.
+6. Cách sửa      : Nâng `certifi==2026.10.18` trong requirements.txt (đổi đúng một dòng, giữ UTF-8 – `tests/test_requirements.py` vẫn PASS).
+7. Commit và xác nhận : [87846fb](https://github.com/Thaiduc2374802010117/smartcrm-2374802010117-technician-assignment/commit/87846fb814b02577368abce99b1506ed2179e390) · `pip-audit -r requirements.txt` → `No known vulnerabilities found`; 61/61 test PASS.
+
 ## Bài tập 2 – lỗi đã gỡ ở giai đoạn 2 (sửa cùng commit tính năng, ghi lại để truy vết)
 
 ### BUG-01 — Lỗi kiểm tra dữ liệu trả 422 và thông báo tiếng Anh

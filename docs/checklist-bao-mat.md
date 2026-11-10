@@ -11,7 +11,7 @@ Mỗi mục: trạng thái **ĐÃ LÀM / CHƯA LÀM / KHÔNG ÁP DỤNG** + minh
 ## 2. Dữ liệu vào được kiểm ở tầng ứng dụng (A05) — ĐÃ LÀM
 - Kiểu dữ liệu kiểm ở lớp trình bày (Pydantic), quy tắc nghiệp vụ ở lớp service; lỗi trả 400 nêu từng trường (TC-06, TC-07, TC-08).
 - Chống injection: mọi giá trị người dùng đi qua tham số `%s` của psycopg. `tests/test_security.py` gửi `' OR '1'='1`, `1 OR 1=1`, `MOI'; DROP TABLE ticket;--` → **400**, không trả danh sách – PASS.
-- Lệnh tìm SQL ghép chuỗi `git grep -nE "execute\(f\"" -- src` ra 3 dòng, đã rà từng dòng: `ticket_repository.py:23` ghép điều kiện WHERE từ **đoạn hằng trong mã** (giá trị vẫn là tham số `%s`); `migrate.py:28`, `seed_dataset.py:176` ghép **tên bảng từ danh sách hằng**. Không có biến người dùng nào trong chuỗi SQL. Ảnh: `sec-2.png`.
+- Lệnh tìm SQL ghép chuỗi `git grep -nE "execute\(f" -- src` ra **4 dòng**, đã rà từng dòng: `ticket_repository.py:23` ghép điều kiện WHERE từ **đoạn hằng trong mã** (giá trị vẫn là tham số `%s`); `migrate.py:28`, `seed_dataset.py:176` ghép **tên bảng từ danh sách hằng**; `migrate.py:16` là `conn.execute(f.read_text(...))` – `f` là **tên biến** trỏ tới tệp SQL migration trong repo, không phải f-string. Không có biến người dùng nào trong chuỗi SQL. Ảnh: `sec-2.png`.
 
 ## 3. Kiểm soát truy cập theo chủ sở hữu (A01) — ĐÃ LÀM
 - Mọi endpoint kiểm vai trò và trung tâm (QT-14). TC-10: quản lý trung tâm 1 phân công phiếu trung tâm 2 → **403**, phiếu không đổi – PASS. TC-11: header định danh giả mạo → **401** – PASS.
@@ -30,6 +30,8 @@ Mỗi mục: trạng thái **ĐÃ LÀM / CHƯA LÀM / KHÔNG ÁP DỤNG** + minh
 - Log chỉ có dòng truy cập (phương thức, đường dẫn, mã trạng thái) và loại lỗi; không log thân yêu cầu, header hay chuỗi kết nối. Dữ liệu L4 không có số điện thoại/email khách.
 - `docker compose logs app | findstr /i "password secret token doi-mat-khau"` (Linux/macOS: `grep -iE`) → **rỗng**. Ảnh: `sec-6.png`.
 
-## 7. Phụ thuộc ghim phiên bản, đã kiểm lỗ hổng (A03) — ĐÃ LÀM phần ghim phiên bản; kiểm lỗ hổng: xem kết quả
+## 7. Phụ thuộc ghim phiên bản, đã kiểm lỗ hổng (A03) — ĐÃ LÀM
 - `requirements.txt` ghim mọi thư viện bằng `==`, UTF-8 (BUG-07); `tests/test_requirements.py` chặn tái diễn; image Docker cố định `python:3.12-slim`, `postgres:16-alpine`, `nginx:1.27-alpine`.
-- Kiểm lỗ hổng: `pip install pip-audit` → `pip-audit -r requirements.txt` → **KẾT QUẢ: (điền sau khi chạy)**. Ảnh: `sec-7.png`.
+- `pip install pip-audit` → `pip-audit -r requirements.txt` lần đầu: **Found 2 known vulnerabilities in 1 package** – `certifi 2026.7.22 PYSEC-2026-4320`, bản vá 2026.10.18 → ghi **BUG-12**, nâng `certifi==2026.10.18` (commit riêng).
+- Chạy lại: **`No known vulnerabilities found`**; 61/61 test PASS. Ảnh: `sec-7-truoc-sua.png` (trước), `sec-7.png` (sau).
+- Ghi chú: pip-audit là công cụ kiểm, không đưa vào requirements.txt; nên chạy lại trước mỗi lần phát hành.

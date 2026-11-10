@@ -16,6 +16,14 @@ Giải quyết V2 (không biết phiếu đang ở đâu) và V3 (phân công th
 - Biến môi trường: xem `.env.example` (`DB_HOST`, `DB_PORT`, `DB_NAME`, `DB_USER`, `DB_PASSWORD`, `APP_PORT`).
   Mật khẩu chỉ ghi trong `.env`, không commit.
 
+## 0. Chạy nhanh bằng Docker (khuyến nghị – BT3)
+Chỉ cần Docker Desktop và Git. Từ thư mục repo vừa clone:
+1. `cp .env.example .env`   (Windows cmd: `copy .env.example .env`)
+2. `docker compose up -d --build`
+
+Giao diện http://localhost:5500 · API http://localhost:3000 · kiểm tra `curl http://localhost:3000/health` → `{"status":"ok","db":"up"}`.
+Hướng dẫn đầy đủ (tiếng Anh): `docs/deployment-guide.md` · API: `docs/api-docs.md` · bảo mật: `docs/checklist-bao-mat.md`.
+
 ## 3. Các bước dựng và chạy hệ thống (mỗi bước một lệnh, chạy trong **cmd** tại thư mục gốc repo)
 Yêu cầu trước: **Python 3.12**, **PostgreSQL 16**, Git; đã tạo database `smartcrm` (pgAdmin → Databases → Create).
 Thư viện ghi phiên bản cố định (`==`) trong `requirements.txt`.
@@ -32,7 +40,7 @@ Thư viện ghi phiên bản cố định (`==`) trong `requirements.txt`.
 | 7 | `python -m src.backend.seed_dataset --data data/official --reopen 5` | Nạp dataset thật, in số dòng và số phiếu MOI mỗi trung tâm |
 | 8 | `uvicorn src.backend.main:app --port 3000` (để cửa sổ này chạy) | `Uvicorn running on http://127.0.0.1:3000` |
 | 9 | Mở **cửa sổ cmd thứ hai** tại thư mục repo: `python -m http.server 5500 -d src/frontend` | Mở http://localhost:5500 → trang đăng nhập |
-| 10 | Cửa sổ thứ ba (đã activate `.venv`): `python -m pytest -v` | `58 passed` |
+| 10 | Cửa sổ thứ ba (đã activate `.venv`): `python -m pytest -v` | `61 passed` |
 | 11 | (tùy chọn) Cửa sổ thứ ba: `powershell -ExecutionPolicy Bypass -File scripts\demo-crud.ps1` | Gọi CRUD đủ cho 2 thực thể, in mã HTTP từng bước |
 
 - Bước 7 cần bộ **Mekong Mobile – Dataset Smart CRM** (E-learning) giải nén vào `data/official/`. Nếu chưa có: chạy
@@ -56,7 +64,7 @@ Thư viện ghi phiên bản cố định (`==`) trong `requirements.txt`.
 ## 5. Kiểm thử
 [![CI](https://github.com/Thaiduc2374802010117/smartcrm-2374802010117-technician-assignment/actions/workflows/ci.yml/badge.svg)](https://github.com/Thaiduc2374802010117/smartcrm-2374802010117-technician-assignment/actions)
 
-- **Toàn bộ bộ kiểm thử – một lệnh:** `python -m pytest -q` → **58 passed** (unit 35 · integration 3 · API 18 · cấu hình 2).
+- **Toàn bộ bộ kiểm thử – một lệnh:** `python -m pytest -q` → **61 passed** (unit 35 · integration 3 · API 21 · cấu hình 2).
 - **Một test case của Test Report (in đủ tám cột):** `python -m scripts.run_tc TC-05` · cả 12: `python -m scripts.run_tc --all`.
 - **Sinh Test Report từ lịch sử chạy thật:** `python -m scripts.run_tc --report` → `docs/test-report.md`.
 - Tài liệu: `docs/test-plan.md` (Test Plan bốn mục) · `docs/test-report.md` (12 test case) · `docs/bug-log.md` (Bug Log bảy dòng).

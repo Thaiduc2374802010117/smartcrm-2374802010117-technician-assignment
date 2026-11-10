@@ -152,3 +152,19 @@ Luồng L4 – Phân công kỹ thuật viên và lịch hẹn · Nguyễn Thái
                       tests/tc_bt3.py, tests/test_tc_bt3.py, tests/test_bug08..10, scripts/run_tc.py, scripts/fill_bug_links.py,
                       .github/workflows/ci.yml; sửa appointment_service.py (BUG-08), api/auth.py (BUG-09),
                       api/appointments.py (BUG-10). Bộ kiểm thử 37 → 58 test.
+
+## Buổi 15 – Đóng gói, triển khai, bảo mật (Bài tập 3)
+
+### TD-17 Đóng gói Docker, /health, tài liệu triển khai và API tiếng Anh
+- Phản hồi / vấn đề : BT3 thành phần 4–6: dựng lại hệ thống từ thư mục trống bằng ≤ 2 lệnh, Deployment Guide năm mục,
+                      checklist bảo mật bảy mục, API docs tiếng Anh đủ mọi endpoint.
+- Quyết định        : SỬA (bổ sung)
+- Lý do             : Dockerfile (python:3.12-slim, user không phải root) + docker-compose ba dịch vụ db/app/web có healthcheck,
+                      app chờ db `service_healthy`, CSDL không mở cổng ra ngoài; bảng và dữ liệu mẫu tự nạp qua
+                      docker-entrypoint-initdb.d (gắn hai tệp SQL sẵn có, không nhân bản); config.py dừng sớm khi thiếu biến.
+                      Chạy thử checklist phát hiện BUG-11 (/db-check lộ cấu hình) → thay bằng /health.
+- Ảnh hưởng         : Dockerfile, docker-compose.yml, .dockerignore, .env.example, src/backend/config.py, main.py,
+                      api/errors.py (JSON hỏng), docs/deployment-guide.md, docs/api-docs.md + docs/openapi.json
+                      (sinh bằng scripts/gen_api_docs.py từ lần chạy thật), docs/checklist-bao-mat.md, tests/test_security.py.
+                      Đính chính: sơ đồ BT2 ghi "16 endpoint E1–E16" là đếm theo dải mã; thực tế 13 endpoint nghiệp vụ
+                      (E6–E8 hoãn – TD-09) + /health.

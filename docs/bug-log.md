@@ -5,7 +5,7 @@ Mẫu bảy dòng (buổi 13). Mức độ phân loại bằng hai câu hỏi, h
 **(2)** Một chức năng quan trọng sai / không dùng được nhưng có cách làm khác? → **MAJOR**. Còn lại → **MINOR**.
 Mỗi bug của BT3 sửa trong **một commit riêng** `fix(...): ... (BUG-xx)`; link commit điền bằng `python -m scripts.fill_bug_links`.
 
-## Bài tập 3 – phát hiện khi kiểm thử hệ thống (buổi 14)
+## Bài tập 3 – phát hiện khi kiểm thử hệ thống (buổi 14) và chạy thử checklist bảo mật (buổi 15)
 
 ### BUG-07 — requirements.txt không đọc được như tệp khoá UTF-8
 1. Mã và mức độ : BUG-07 · **MAJOR** — câu (1): không, hệ thống vẫn chạy, dữ liệu không sai; câu (2): có – chức năng "dựng lại hệ thống trên máy khác" không bảo đảm cài đúng phiên bản; cách làm tạm: pip trên Windows vẫn tự nhận ra UTF-16.
@@ -42,6 +42,15 @@ Mỗi bug của BT3 sửa trong **một commit riêng** `fix(...): ... (BUG-xx)`
 5. Nguyên nhân   : Controller E4 chuyển thẳng hai giá trị thời gian (một có, một không có múi giờ) cho service; phép so sánh `end <= start` giữa hai kiểu thời gian khác nhau ném TypeError.
 6. Cách sửa      : Controller chuẩn hoá thời gian không ghi múi giờ thành giờ Việt Nam (+07:00) trước khi gọi service – cùng quy ước với E5/E15; thêm `tests/test_bug10_mui_gio.py`.
 7. Commit và xác nhận : [3a664e7](https://github.com/Thaiduc2374802010117/smartcrm-2374802010117-technician-assignment/commit/3a664e7750834f0e157e925d7f496118580fb48b) · gọi lại E4 → 200; toàn bộ bộ test PASS.
+
+### BUG-11 — Kiểm tra sức khoẻ lộ host, cổng, tên user CSDL và trả 200 khi hệ thống hỏng
+1. Mã và mức độ : BUG-11 · **MAJOR** — câu (1): không lộ mật khẩu hay dữ liệu khách, hệ thống vẫn chạy; câu (2): có – chức năng kiểm tra sức khoẻ (dùng cho healthcheck triển khai) báo sai "200" khi CSDL hỏng nên không phát hiện được sự cố, đồng thời lộ thông tin cấu hình (OWASP A02/A10); cách làm tạm: gọi một API nghiệp vụ để biết CSDL lỗi.
+2. Phát hiện bởi : Chạy thử checklist bảo mật mục 5 (buổi 15) – gọi `/db-check` khi CSDL sai mật khẩu.
+3. Triệu chứng   : `GET /db-check` trả **200** `{"status":"ERROR","message":"connection failed: connection to server at \"127.0.0.1\", port 5432 failed: … for user \"postgres\""}`.
+4. Cách tái lập : Đặt `DB_PASSWORD` sai (hoặc dừng PostgreSQL) rồi gọi `GET /db-check` – lặp lại 3/3 lần.
+5. Nguyên nhân   : Endpoint smoke test từ buổi 2 trả nguyên `str(e)` của psycopg cho người gọi và luôn trả 200.
+6. Cách sửa      : Thay bằng `GET /health`: 200 `{"status":"ok","db":"up"}` hoặc **503** `{"status":"degraded","db":"down"}`, chi tiết lỗi chỉ ghi log (chỉ tên loại lỗi); `/db-check` giữ làm bí danh của `/health`; thêm `tests/test_bug11_health_khong_lo_cau_hinh.py`.
+7. Commit và xác nhận : [6d1bf29](https://github.com/Thaiduc2374802010117/smartcrm-2374802010117-technician-assignment/commit/6d1bf29163931a44094938f44764ea4366faddc1) · gọi lại khi CSDL hỏng → 503, không có "127.0.0.1", "5432", "user"; toàn bộ bộ test PASS.
 
 ## Bài tập 2 – lỗi đã gỡ ở giai đoạn 2 (sửa cùng commit tính năng, ghi lại để truy vết)
 

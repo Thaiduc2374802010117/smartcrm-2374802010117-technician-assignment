@@ -52,5 +52,8 @@ def register(app):
 
     @app.exception_handler(RequestValidationError)
     async def validation_error(_: Request, e: RequestValidationError):
+        if any(err.get("type") == "json_invalid" for err in e.errors()):      # thân yêu cầu không phải JSON hợp lệ
+            return JSONResponse(status_code=400, content=body("VALIDATION_FAILED", "Dữ liệu không hợp lệ",
+                                                              {"body": "JSON không hợp lệ"}))
         fields = {".".join(str(x) for x in err["loc"] if x not in ("body", "query", "path")): vi(err) for err in e.errors()}
         return JSONResponse(status_code=400, content=body("VALIDATION_FAILED", "Dữ liệu không hợp lệ", fields))

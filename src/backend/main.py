@@ -9,13 +9,14 @@ from fastapi import FastAPI
 from fastapi.responses import JSONResponse
 from fastapi.middleware.cors import CORSMiddleware
 
-from . import db
+from . import config, db
 from .api import errors
 from .api.appointments import router as appointments_router
 from .api.technicians import router as technicians_router
 from .api.tickets import router as tickets_router
 
-app = FastAPI(title="Smart CRM – L4 Phân công kỹ thuật viên và lịch hẹn", version="0.4.0")
+config.check_env()      # dừng sớm nếu .env thiếu biến bắt buộc
+app = FastAPI(title="Smart CRM – L4 Phân công kỹ thuật viên và lịch hẹn", version="1.0.0")
 errors.register(app)
 app.include_router(tickets_router)
 app.include_router(appointments_router)

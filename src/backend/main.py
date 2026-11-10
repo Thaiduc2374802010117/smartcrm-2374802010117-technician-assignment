@@ -2,9 +2,11 @@
 Chạy (từ thư mục gốc repo):  uvicorn src.backend.main:app --reload --port 3000
 Giao diện (cửa sổ khác): python -m http.server 5500 -d src/frontend → http://localhost:5500
 Tài liệu API: http://localhost:3000/docs"""
+import logging
 import os
 
 from fastapi import FastAPI
+from fastapi.responses import JSONResponse
 from fastapi.middleware.cors import CORSMiddleware
 
 from . import db
@@ -29,11 +31,19 @@ def hello():
     return "Hello Smart CRM"
 
 
-@app.get("/db-check", summary="Kiểm tra kết nối CSDL (smoke test buổi 2)")
-def db_check():
+@app.get("/health", summary="Kiểm tra hệ thống: app và CSDL (healthcheck của docker compose)")
+def health():
+    """Chỉ trả TRẠNG THÁI – chi tiết lỗi kết nối (host, cổng, tên user) chỉ ghi vào log, không gửi cho người gọi (BUG-11)."""
     try:
         with db.connect() as conn:
-            row = conn.execute("SELECT now() AS server_time").fetchone()
-        return {"status": "OK", "database": os.getenv("DB_NAME"), "server_time": str(row["server_time"])}
-    except Exception as e:  # noqa: BLE001 – smoke test cần báo mọi lỗi kết nối
-        return {"status": "ERROR", "message": str(e)}
+            conn.execute("SELECT 1")
+        return {"status": "ok", "db": "up"}
+    except Exception as e:  # noqa: BLE001 – mọi lỗi kết nối đều là "db down"
+        logging.getLogger("smartcrm").error("Health check: CSDL không phản hồi (%s)", type(e).__name__)
+        return JSONResponse(status_code=503, content={"status": "degraded", "db": "down"})
+
+
+@app.get("/db-check", include_in_schema=False)
+def db_check():
+    """Giữ đường dẫn cũ của buổi 2 cho tương thích – trả đúng như /health."""
+    return health()

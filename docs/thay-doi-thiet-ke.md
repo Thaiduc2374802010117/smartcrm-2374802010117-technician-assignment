@@ -118,7 +118,7 @@ Luồng L4 – Phân công kỹ thuật viên và lịch hẹn · Nguyễn Thái
                       chưa đến giờ bắt đầu (QT-L4-06, khôi phục lại). W10 "hủy lịch hẹn thủ công" chuyển vào phạm vi.
 - Ảnh hưởng         : api/technicians.py, api/appointments.py, services/technician_service.py, AppointmentService,
                       repositories; docs/api-contract.md mục 7; 14 test mới (35 test tổng). Sơ đồ docs/architecture.drawio cập nhật
-                      theo mã đã hiện thực: mỗi lớp ghi thư mục mã, thêm TechnicianService, 16 endpoint E1 – E16.
+                      theo mã đã hiện thực: mỗi lớp ghi thư mục mã, thêm TechnicianService, 13 endpoint (E1–E5, E9–E16) + /health.
 
 ### TD-14 Suy giảm có kiểm soát khi CSDL tắt
 - Phản hồi / vấn đề : Mục C7 – tắt một thành phần phụ trợ, nghiệp vụ chính phải báo lỗi rõ, không trả lỗi thô.
@@ -166,5 +166,14 @@ Luồng L4 – Phân công kỹ thuật viên và lịch hẹn · Nguyễn Thái
 - Ảnh hưởng         : Dockerfile, docker-compose.yml, .dockerignore, .env.example, src/backend/config.py, main.py,
                       api/errors.py (JSON hỏng), docs/deployment-guide.md, docs/api-docs.md + docs/openapi.json
                       (sinh bằng scripts/gen_api_docs.py từ lần chạy thật), docs/checklist-bao-mat.md, tests/test_security.py.
-                      Đính chính: sơ đồ BT2 ghi "16 endpoint E1–E16" là đếm theo dải mã; thực tế 13 endpoint nghiệp vụ
+                      Đính chính: sơ đồ BT2 từng ghi "16 endpoint" là đếm theo dải mã E1–E16 (đã sửa sơ đồ); thực tế 13 endpoint nghiệp vụ
                       (E6–E8 hoãn – TD-09) + /health.
+
+### TD-18 Rà soát tài liệu theo bảng mục kiểm chứng BT3 trước khi nộp (C4, C9)
+- Phản hồi / vấn đề : Tự rà repo ở tag v1.0 theo C1–C9: README và sơ đồ kiến trúc còn ghi "16 endpoint"; api-contract (thiết kế BT1)
+                      mô tả E6–E8 mà không ghi chưa hiện thực; phần bug BT2 trong bug-log có hai commit sửa chung hai bug.
+- Quyết định        : SỬA
+- Lý do             : C9 – tài liệu kỹ thuật phải mô tả đúng hệ thống thật, không mô tả tính năng chưa có; C4 – mỗi bug một commit.
+- Ảnh hưởng         : README và sơ đồ (architecture.drawio/png) ghi 13 endpoint E1–E5, E9–E16 + /health; api-contract.md có banner
+                      trạng thái hiện thực và đánh dấu E6–E8 "chưa hiện thực"; bug BT2 tách sang docs/bug-log-bt2.md, docs/bug-log.md
+                      chỉ còn 6 bug BT3 (BUG-07 … BUG-12), mỗi bug một commit riêng. Không đổi mã nguồn – tag v1.0 gắn lại sau khi sửa.

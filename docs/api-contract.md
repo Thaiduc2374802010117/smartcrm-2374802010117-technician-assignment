@@ -1,4 +1,6 @@
 # Hợp đồng API (API contract) – Luồng L4
+
+> **Trạng thái hiện thực (BT3, tag v1.0):** đây là API contract THIẾT KẾ ở BT1. Hệ thống thật có **13 endpoint nghiệp vụ** (E1–E5, E9–E16) + `GET /health`. **E6 (đổi kỹ thuật viên), E7 (phiếu của kỹ thuật viên), E8 (bảng khối lượng công việc) CHƯA HIỆN THỰC** – đã hoãn có lý do (`docs/thay-doi-thiet-ke.md` TD-09). Tài liệu kỹ thuật mô tả đúng hệ thống đang chạy: `docs/api-docs.md`.
 ## Phân công kỹ thuật viên và lịch hẹn giao – nhận máy bảo hành
 
 Sinh viên: Nguyễn Thái Đức – MSSV 2374802010117 – Track SE
@@ -15,9 +17,9 @@ Tài liệu bổ sung kỹ thuật cho [SRS](srs.md). Mọi endpoint truy vết 
 | E3 | POST | `/api/tickets/{ticket_id}/assignment` | Phân công phiếu Mới cho một kỹ thuật viên | US3 | FR3 | Quản lý |
 | E4 | GET | `/api/technicians/{technician_id}/appointments` | Xem lịch hẹn của kỹ thuật viên trong khoảng thời gian | US5 | FR5 | Quản lý |
 | E5 | POST | `/api/tickets/{ticket_id}/appointments` | Tạo lịch hẹn giao / trả máy, chặn trùng lịch | US5 | FR5 | Quản lý |
-| E6 | PUT | `/api/tickets/{ticket_id}/assignment` | Đổi kỹ thuật viên kèm lý do | US4 | FR4 | Quản lý |
-| E7 | GET | `/api/me/tickets` | Danh sách phiếu đang mở của kỹ thuật viên đang dùng | US6 | FR6 | Kỹ thuật viên |
-| E8 | GET | `/api/workload` | Bảng khối lượng công việc của trung tâm | US7 | FR7 | Quản lý |
+| E6 ⚠️ chưa hiện thực | PUT | `/api/tickets/{ticket_id}/assignment` | Đổi kỹ thuật viên kèm lý do | US4 | FR4 | Quản lý |
+| E7 ⚠️ chưa hiện thực | GET | `/api/me/tickets` | Danh sách phiếu đang mở của kỹ thuật viên đang dùng | US6 | FR6 | Kỹ thuật viên |
+| E8 ⚠️ chưa hiện thực | GET | `/api/workload` | Bảng khối lượng công việc của trung tâm | US7 | FR7 | Quản lý |
 
 Các endpoint `GET /` và `GET /db-check` là smoke test hạ tầng của Buổi 2, không phục vụ User Story nên **không thuộc hợp đồng này**.
 Việc kỹ thuật viên cập nhật tiến độ sửa chữa là W4 trong SRS nên không có endpoint.
@@ -243,9 +245,9 @@ Lịch hẹn tự gắn với kỹ thuật viên **đang giữ phiếu** (QT-L4-
 
 | Endpoint | Request | Response thành công | Response lỗi chính |
 |---|---|---|---|
-| **E6** PUT `/api/tickets/{id}/assignment` | `{ "technician_id": 7, "reason": "KTV B nghỉ phép đột xuất" }` | 200 – phiếu với `technician_id` mới, dòng `status_log` có `from_technician_id`, `to_technician_id`, `note` = lý do; lịch hẹn chưa diễn ra bị hủy (QT-L4-05) | 400 thiếu lý do · 409 phiếu không đang mở hoặc chọn trùng KTV hiện tại · 422 KTV mới không thỏa QT-08 |
-| **E7** GET `/api/me/tickets` | Query `page`, `size` | 200 – danh sách phiếu đang mở của KTV, sắp theo `due_date`, có `is_due_soon`, `is_overdue` | 401 thiếu người dùng · 403 không phải KTV |
-| **E8** GET `/api/workload` | Không | 200 – `[{ technician_id, full_name, open_ticket_count, due_soon_count, overdue_count }]` | 401 thiếu người dùng · 403 không phải Quản lý |
+| **E6** PUT `/api/tickets/{id}/assignment` – ⚠️ CHƯA HIỆN THỰC (TD-09) | `{ "technician_id": 7, "reason": "KTV B nghỉ phép đột xuất" }` | 200 – phiếu với `technician_id` mới, dòng `status_log` có `from_technician_id`, `to_technician_id`, `note` = lý do; lịch hẹn chưa diễn ra bị hủy (QT-L4-05) | 400 thiếu lý do · 409 phiếu không đang mở hoặc chọn trùng KTV hiện tại · 422 KTV mới không thỏa QT-08 |
+| **E7** GET `/api/me/tickets` – ⚠️ CHƯA HIỆN THỰC (TD-09) | Query `page`, `size` | 200 – danh sách phiếu đang mở của KTV, sắp theo `due_date`, có `is_due_soon`, `is_overdue` | 401 thiếu người dùng · 403 không phải KTV |
+| **E8** GET `/api/workload` – ⚠️ CHƯA HIỆN THỰC (TD-09) | Không | 200 – `[{ technician_id, full_name, open_ticket_count, due_soon_count, overdue_count }]` | 401 thiếu người dùng · 403 không phải Quản lý |
 
 ---
 
@@ -273,6 +275,9 @@ Lịch hẹn tự gắn với kỹ thuật viên **đang giữ phiếu** (QT-L4-
 
 ### E6 – PUT assignment
 
+> ⚠️ **CHƯA HIỆN THỰC** – hoãn theo TD-09; gọi endpoint này trên hệ thống thật trả 404.
+
+
 | Trường | Bắt buộc | Kiểu / ràng buộc | Thông báo lỗi |
 |---|---|---|---|
 | `technician_id` | Có | Như E3; khác kỹ thuật viên hiện tại | Kỹ thuật viên mới phải khác kỹ thuật viên hiện tại |
@@ -298,7 +303,7 @@ Phiên bản hiện tại **giả lập** người dùng (W8 trong SRS): mỗi r
 | Endpoint | Quản lý trung tâm | Kỹ thuật viên |
 |---|---|---|
 | E1, E2, E3, E4, E5, E6, E8 | ✅ trong trung tâm mình | ❌ 403 |
-| E7 | ❌ 403 | ✅ phiếu của chính mình |
+| E7 ⚠️ chưa hiện thực | ❌ 403 | ✅ phiếu của chính mình |
 
 Thiếu header hoặc giá trị không hợp lệ → **401**. Đúng vai trò nhưng khác trung tâm → **403** (QT-14).
 

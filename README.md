@@ -76,7 +76,7 @@ Thư viện ghi phiên bản cố định (`==`) trong `requirements.txt`.
 curl -s -H "X-Employee-Id: 3" -H "X-Role: QUAN_LY" -H "X-Center-Id: 2" localhost:3000/api/technicians
 curl -s -X POST -H "X-Employee-Id: 3" -H "X-Role: QUAN_LY" -H "X-Center-Id: 2" -H "Content-Type: application/json" -d "{\"full_name\":\"Tran Van Moi\",\"level\":\"SO_CAP\"}" localhost:3000/api/technicians
 ```
-Danh sách đầy đủ 16 endpoint và mã lỗi: `docs/api-contract.md` · thử trực quan: http://localhost:3000/docs
+Danh sách đầy đủ **13 endpoint nghiệp vụ + `/health`** và mã lỗi: `docs/api-docs.md` (tiếng Anh) · thử trực quan: http://localhost:3000/docs
 
 ## 6. Trạng thái hiện tại (buổi 12 – nộp BT2, tag `v0.2`)
 - [x] Module Phân công: E1, E2, E3 qua 3 lớp; NFR3 đã kiểm chứng (TC07)

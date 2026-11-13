@@ -19,4 +19,5 @@ RUN useradd -m appuser && mkdir -p docs && chown -R appuser /app
 USER appuser
 
 EXPOSE 3000
-CMD ["uvicorn", "src.backend.main:app", "--host", "0.0.0.0", "--port", "3000"]
+# Cổng lấy từ $PORT (nền tảng cloud cấp), mặc định 3000; AUTO_MIGRATE=1 chỉ đặt khi deploy (xem src/backend/start.py)
+CMD ["python", "-m", "src.backend.start"]

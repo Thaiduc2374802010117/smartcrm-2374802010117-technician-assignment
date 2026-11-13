@@ -23,9 +23,9 @@ Nguyễn Thái Đức – 2374802010117 · Repo tag v1.0 · Test Report: `docs/t
 |---|---|---|---|
 | Unit – lớp nghiệp vụ và kiểm tra quyền (repository giả, không CSDL) | 35 | `tests/test_assignment_service.py`, `test_appointment_service.py`, `test_technician_service.py`, hồi quy `test_bug08_*.py`, `test_bug09_*.py` | Cô lập service khỏi CSDL và thời gian (truyền `now`) |
 | Integration – service + PostgreSQL thử | 3 | `tests/test_integration_db.py` | TC07 NFR3 đồng thời, TC10 ràng buộc EXCLUDE, AC2.1 |
-| API – FastAPI TestClient + PostgreSQL thử | 21 = 4 CRUD + **12 test case BT3** + 3 hồi quy + 2 bảo mật | `tests/test_api_crud.py`, `tests/test_tc_bt3.py`, `tests/test_bug10_*.py`, `test_bug11_*.py`, `test_security.py` | 12 test case của Test Report, chạy cả bằng `scripts/run_tc.py` |
+| API – FastAPI TestClient + PostgreSQL thử | 23 = 4 CRUD + **12 test case BT3** + 3 hồi quy + 2 bảo mật + 2 deploy | `tests/test_api_crud.py`, `tests/test_tc_bt3.py`, `tests/test_bug10_*.py`, `test_bug11_*.py`, `test_security.py`, `test_deploy_start.py` | 12 test case của Test Report, chạy cả bằng `scripts/run_tc.py` |
 | Cấu hình | 2 | `tests/test_requirements.py` | Tệp khoá phiên bản `==`, UTF-8 (C6 – BUG-07) |
-| **Tổng** | **61** | `python -m pytest -q` | Chạy cả trên CI (GitHub Actions) mỗi lần push |
+| **Tổng** | **63** | `python -m pytest -q` | Chạy cả trên CI (GitHub Actions) mỗi lần push |
 
 **Kỹ thuật chọn dữ liệu:**
 - **Phân vùng tương đương** cho khung giờ lịch hẹn: hợp lệ (15–120 phút, trong 08:00–18:00, thứ Hai – thứ Bảy) · quá ngắn · quá dài · ngoài giờ · Chủ nhật · quá khứ; cho người dùng: cùng trung tâm · khác trung tâm · header thiếu · header ngoài phạm vi.

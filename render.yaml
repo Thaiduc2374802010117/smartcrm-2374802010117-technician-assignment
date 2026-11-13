@@ -1,0 +1,29 @@
+# Render Blueprint – deploy thử (đề BT3 mục 3.3). Mọi giá trị bí mật lấy từ CSDL của nền tảng (fromDatabase), không có trong repo.
+databases:
+  - name: smartcrm-l4-db
+    plan: free
+    databaseName: smartcrm
+    user: smartcrm
+
+services:
+  - type: web
+    name: smartcrm-l4-2374802010117
+    runtime: docker
+    plan: free
+    branch: main
+    healthCheckPath: /health
+    envVars:
+      - key: DB_HOST
+        fromDatabase: { name: smartcrm-l4-db, property: host }
+      - key: DB_PORT
+        fromDatabase: { name: smartcrm-l4-db, property: port }
+      - key: DB_NAME
+        fromDatabase: { name: smartcrm-l4-db, property: database }
+      - key: DB_USER
+        fromDatabase: { name: smartcrm-l4-db, property: user }
+      - key: DB_PASSWORD
+        fromDatabase: { name: smartcrm-l4-db, property: password }
+      - key: AUTO_MIGRATE
+        value: "1"
+      - key: SERVE_FRONTEND
+        value: "1"

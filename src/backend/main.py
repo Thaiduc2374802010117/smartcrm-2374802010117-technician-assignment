@@ -6,7 +6,8 @@ import logging
 import os
 
 from fastapi import FastAPI
-from fastapi.responses import JSONResponse
+from fastapi.responses import JSONResponse, RedirectResponse
+from fastapi.staticfiles import StaticFiles
 from fastapi.middleware.cors import CORSMiddleware
 
 from . import config, db
@@ -27,8 +28,16 @@ app.add_middleware(CORSMiddleware,
                    allow_methods=["GET", "POST", "PUT", "DELETE"], allow_headers=["Content-Type", "X-Employee-Id", "X-Role", "X-Center-Id"])
 
 
+# Khi deploy một dịch vụ duy nhất (Render): phục vụ luôn giao diện tĩnh ở /app – cùng địa chỉ với API nên không cần CORS.
+SERVE_FRONTEND = os.getenv("SERVE_FRONTEND") == "1"
+if SERVE_FRONTEND:
+    app.mount("/app", StaticFiles(directory=str(db.ROOT / "src" / "frontend"), html=True), name="frontend")
+
+
 @app.get("/", include_in_schema=False)
 def hello():
+    if SERVE_FRONTEND:                       # bản deploy: mở địa chỉ gốc là vào thẳng giao diện
+        return RedirectResponse("/app/")
     return "Hello Smart CRM"
 
 

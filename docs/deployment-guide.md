@@ -28,6 +28,9 @@ Stop: `docker compose down` · reset everything incl. data: `docker compose down
 | WEB_PORT | Host port of the web UI | 5500 | no |
 | FRONTEND_ORIGIN | Origins allowed to call the API (CORS), comma-separated | http://localhost:5500,http://127.0.0.1:5500 | no |
 | TEST_DB_NAME | Separate database used by the integration tests | smartcrm_test | no |
+| PORT | Port the app listens on inside the container (set by cloud platforms) | 3000 | no |
+| AUTO_MIGRATE | `1` = create tables at start-up and load sample data only if the database is empty (cloud only; not used with docker compose) | – | no |
+| SERVE_FRONTEND | `1` = the API also serves the web UI at `/app/` (single-service cloud deploy) | – | no |
 
 The app stops at start-up with `Thiếu biến môi trường: <NAME>` if a required variable is missing (values are never printed).
 
@@ -46,7 +49,7 @@ Optional — official Smart CRM dataset (7,800 tickets, 38 technicians, 6 centre
 | `docker compose ps` | `db`, `app`, `web` all `Up … (healthy)` |
 | `curl http://localhost:3000/health` (PowerShell: `curl.exe`) | `{"status":"ok","db":"up"}` |
 | `curl -H "X-Employee-Id: 3" -H "X-Role: QUAN_LY" -H "X-Center-Id: 2" "http://localhost:3000/api/tickets?status=MOI"` | JSON with `"total":3` |
-| `docker compose exec app python -m pytest -q` | `61 passed` |
+| `docker compose exec app python -m pytest -q` | `63 passed` |
 | `docker compose exec app python -m scripts.run_tc TC-09` | eight-column test case ending with `PASS` |
 | `docker compose exec app python -m scripts.run_tc TC-12` (run migration + sample data a **second time**) | `PASS`; row counts of the 6 tables are identical both times `[6, 6, 10, 13, 0, 0]` – nothing is duplicated |
 | `docker compose down` then `docker compose up -d` again | `/health` is `ok` again and the data is exactly as before the restart – nothing duplicated (initialisation scripts run only on an empty volume) |
@@ -64,3 +67,13 @@ Optional — official Smart CRM dataset (7,800 tickets, 38 technicians, 6 centre
 Monitoring: `GET /health` checks app + database (used by the compose healthcheck); access logs show method, path and status of every request.
 - **ALERT-01 API errors** — Measure: share of 5xx on `/api/*`, 5-minute window · Threshold: > 2 % in 2 consecutive windows · Notify: on-duty operator (chat) · Action: 1) `docker compose logs app --tail 200`; 2) if `/health` returns `"db":"down"`: `docker compose restart db`, then `/health` must return `"db":"up"`; 3) still failing after 10 min → escalate to the developer.
 - **ALERT-02 Tickets close to their committed deadline (business)** — Measure: open tickets with `due_date` within 4 h, checked hourly · Threshold: > 10 per centre · Notify: service-centre manager (e-mail) · Action: open screen M1, filter NEW tickets, assign the overdue ones to technicians with the fewest open tickets (screen M2 suggestions).
+
+## 8. Public deployment – Render (optional, BT3 section 3.3)
+Live URL: **https://smartcrm-l4-2374802010117.onrender.com** (web UI at `/app/`, API docs at `/docs`, health at `/health`). Free plan: the service sleeps after ~15 min idle – open the URL once and wait about 1 minute before checking.
+
+Steps done (no secret is stored in the repo – all database values come from the platform):
+1. Sign in to https://render.com with GitHub → **New → Blueprint** → choose this repository (branch `main`). Render reads `render.yaml`.
+2. The blueprint creates a free PostgreSQL database `smartcrm-l4-db` and a Docker web service `smartcrm-l4-2374802010117` built from the same `Dockerfile`.
+3. Environment variables are configured on the platform: `DB_HOST`, `DB_PORT`, `DB_NAME`, `DB_USER`, `DB_PASSWORD` are linked to the database (`fromDatabase`); `AUTO_MIGRATE=1`, `SERVE_FRONTEND=1`; `PORT` is provided by Render.
+4. **Apply** → wait until the service shows **Live**. On first start the log prints `Chuẩn bị CSDL: đã nạp dữ liệu mẫu`; later restarts print `bảng đã có dữ liệu – giữ nguyên` (no data is wiped or duplicated).
+5. Verify: `https://smartcrm-l4-2374802010117.onrender.com/health` → `{"status":"ok","db":"up"}`; open `https://smartcrm-l4-2374802010117.onrender.com/app/` → **Đăng nhập** (3 / 2) → list of 3 NEW tickets.

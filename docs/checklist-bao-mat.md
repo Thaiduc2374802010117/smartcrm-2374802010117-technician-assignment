@@ -6,7 +6,7 @@ Mỗi mục: trạng thái **ĐÃ LÀM / CHƯA LÀM / KHÔNG ÁP DỤNG** + minh
 ## 1. Không có secret nào trong repo (OWASP A02) — ĐÃ LÀM
 - `git log --all --oneline -- .env` → **rỗng** (.env chưa từng vào lịch sử) · `git check-ignore -v .env` → `.gitignore:…:.env`.
 - `git grep -niE "(password|secret|api_key)\s*=\s*['\"][^'\"]+['\"]" -- src` → **rỗng**: mật khẩu chỉ đọc từ biến môi trường (`os.getenv`).
-- `.env.example` chỉ chứa giá trị MẪU; `.dockerignore` loại `.env` khỏi image; CI dùng mật khẩu thử riêng. Ảnh: `sec-1.png`.
+- `.env.example` chỉ chứa giá trị MẪU; `.dockerignore` loại `.env` khỏi image; CI dùng mật khẩu thử riêng; bản deploy Render lấy thông tin CSDL từ biến môi trường của nền tảng (`fromDatabase` trong `render.yaml`), không có giá trị bí mật nào trong repo. Ảnh: `sec-1.png`.
 
 ## 2. Dữ liệu vào được kiểm ở tầng ứng dụng (A05) — ĐÃ LÀM
 - Kiểu dữ liệu kiểm ở lớp trình bày (Pydantic), quy tắc nghiệp vụ ở lớp service; lỗi trả 400 nêu từng trường (TC-06, TC-07, TC-08).

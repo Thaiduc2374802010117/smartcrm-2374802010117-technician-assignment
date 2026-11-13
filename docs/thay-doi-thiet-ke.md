@@ -189,3 +189,13 @@ Luồng L4 – Phân công kỹ thuật viên và lịch hẹn · Nguyễn Thái
                       trên thư mục mới theo tag v1.0, ảnh `docs/screenshots/v1-*.png`. Đã rà sáu lỗi hay gặp: không có đường dẫn
                       tuyệt đối trong `src/`, không có script `.sh`, `.gitignore` chỉ bỏ qua `__pycache__`, `.env`, `.venv`.
 - Ảnh hưởng         : docs/deployment-guide.md, docs/api-docs.md. Không đổi mã nguồn.
+
+### TD-20 Deploy thử lên Render (điểm cộng đề BT3 mục 3.3)
+- Phản hồi / vấn đề : Điểm cộng +1,0 cần đường dẫn công khai mở được, biến môi trường cấu hình trên nền tảng và mục ghi các bước deploy.
+- Quyết định        : SỬA (bổ sung, không đổi nghiệp vụ)
+- Lý do             : Nền tảng cloud cấp cổng qua $PORT và không có docker-entrypoint-initdb.d → thêm `src/backend/start.py`
+                      (cổng từ $PORT; AUTO_MIGRATE=1 tạo bảng và nạp mẫu CHỈ khi CSDL trống – khởi động lại không xoá/nhân đôi);
+                      SERVE_FRONTEND=1 để một dịch vụ phục vụ cả giao diện ở /app (cùng địa chỉ, không cần CORS); `config.js` tự chọn
+                      địa chỉ API. `render.yaml` khai báo dịch vụ + CSDL, mật khẩu lấy từ nền tảng. docker compose giữ nguyên hành vi.
+- Ảnh hưởng         : Dockerfile (CMD), src/backend/start.py, src/backend/main.py, src/frontend/api/config.js, render.yaml,
+                      tests/test_deploy_start.py (2 test), docs/deployment-guide.md mục 8, README. Bộ kiểm thử 61 → 63. URL: https://smartcrm-l4-2374802010117.onrender.com

@@ -8,7 +8,7 @@ Author: Nguyen Thai Duc (2374802010117). Two commands build and start the whole 
 - Free host ports **3000** (API) and **5500** (web UI). The database port is NOT published. No Python or PostgreSQL needs to be installed.
 
 ## 2. Setup steps
-1. `git clone --branch v1.0 https://github.com/Thaiduc2374802010117/smartcrm-2374802010117-technician-assignment.git smartcrm-l4`
+1. Start in an EMPTY folder, then `git clone --branch v1.0 https://github.com/Thaiduc2374802010117/smartcrm-2374802010117-technician-assignment.git smartcrm-l4`
 2. `cd smartcrm-l4`
 3. `cp .env.example .env`   (Windows cmd: `copy .env.example .env`)
 4. `docker compose up -d --build`   (first build takes about 2–3 minutes)
@@ -48,6 +48,8 @@ Optional — official Smart CRM dataset (7,800 tickets, 38 technicians, 6 centre
 | `curl -H "X-Employee-Id: 3" -H "X-Role: QUAN_LY" -H "X-Center-Id: 2" "http://localhost:3000/api/tickets?status=MOI"` | JSON with `"total":3` |
 | `docker compose exec app python -m pytest -q` | `61 passed` |
 | `docker compose exec app python -m scripts.run_tc TC-09` | eight-column test case ending with `PASS` |
+| `docker compose exec app python -m scripts.run_tc TC-12` (run migration + sample data a **second time**) | `PASS`; row counts of the 6 tables are identical both times `[6, 6, 10, 13, 0, 0]` – nothing is duplicated |
+| `docker compose down` then `docker compose up -d` again | `/health` is `ok` again and the data is exactly as before the restart – nothing duplicated (initialisation scripts run only on an empty volume) |
 | Open `http://localhost:5500` → **Đăng nhập** (3 / 2) | list of 3 tickets → *Phân công* → *Đặt lịch hẹn* saves an appointment |
 
 ## 6. Troubleshooting

@@ -177,3 +177,15 @@ Luồng L4 – Phân công kỹ thuật viên và lịch hẹn · Nguyễn Thái
 - Ảnh hưởng         : README và sơ đồ (architecture.drawio/png) ghi 13 endpoint E1–E5, E9–E16 + /health; api-contract.md có banner
                       trạng thái hiện thực và đánh dấu E6–E8 "chưa hiện thực"; bug BT2 tách sang docs/bug-log-bt2.md, docs/bug-log.md
                       chỉ còn 6 bug BT3 (BUG-07 … BUG-12), mỗi bug một commit riêng. Không đổi mã nguồn – tag v1.0 gắn lại sau khi sửa.
+
+## Buổi 16 – Workshop đóng gói prototype và tài liệu kỹ thuật (nộp Bài tập 3)
+
+### TD-19 Bổ sung theo bảng tự đối chiếu buổi 16
+- Phản hồi / vấn đề : Buổi 16 yêu cầu phép thử máy trắng clone theo TAG v1.0, bước chạy lại lần hai (C8) trong "Verify it works",
+                      và S1 "số route trong mã = số endpoint trong tài liệu".
+- Quyết định        : SỬA (bổ sung)
+- Lý do             : Guide thêm bước kiểm C8 (`run_tc TC-12` trong container, `down` rồi `up` lại không nhân đôi); api-docs ghi phép
+                      đối chiếu 14 operation OpenAPI = 14 mục và hai route phụ ẩn (`/`, `/db-check`); phép thử máy trắng làm lại
+                      trên thư mục mới theo tag v1.0, ảnh `docs/screenshots/v1-*.png`. Đã rà sáu lỗi hay gặp: không có đường dẫn
+                      tuyệt đối trong `src/`, không có script `.sh`, `.gitignore` chỉ bỏ qua `__pycache__`, `.env`, `.venv`.
+- Ảnh hưởng         : docs/deployment-guide.md, docs/api-docs.md. Không đổi mã nguồn.
